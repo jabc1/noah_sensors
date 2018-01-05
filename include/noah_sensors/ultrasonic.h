@@ -34,6 +34,7 @@ enum
     ULTRASONIC_MODE_FORWARD     = 0,
     ULTRASONIC_MODE_BACKWARD    = 1,
     ULTRASONIC_MODE_TURNING     = 2,
+    ULTRASONIC_MODE_STOP        = 3,
     ULTRASONIC_MODE_MAX,
     ULTRASONIC_MODE_NONE,
 };
@@ -63,6 +64,9 @@ class Ultrasonic
             work_mode_ack_pub = n.advertise<std_msgs::UInt8MultiArray>("ultrasonic_work_mode_ack",20);
             set_work_mode_start_time = ros::Time::now();
 
+
+            test_data_pub = n.advertise<std_msgs::UInt8MultiArray>("sensors_test_data",20);//just for hardware test
+
             group_id_vec.clear();
             ultrasonic_msgs.sonars.resize(ULTRASONIC_NUM_MAX - 1);
         }
@@ -70,13 +74,14 @@ class Ultrasonic
         int start_measurement(uint8_t ul_id);
         void get_version(uint8_t ul_id);
         void ultrasonic_en(uint8_t ul_id, bool en);
-        int broadcast_measurement(uint8_t group);
+        int broadcast_measurement(uint32_t group);
         int set_group(uint8_t ul_id, uint8_t group);
         void rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg);
         void work_mode_callback(const std_msgs::UInt8MultiArray data);
         void update_status(void);
         void pub_ultrasonic_data_to_navigation(double *data);
         void update_measure_en(uint32_t ul_en);
+        void updata_work_mode(void);
 
         uint8_t group_init_flag = 0;
         bool is_log_on;
@@ -88,16 +93,26 @@ class Ultrasonic
         uint8_t work_mode = ULTRASONIC_MODE_FORWARD;
         uint32_t current_work_mode_ul = 0;
 
+
+        std_msgs::UInt8MultiArray test_data;
+        ros::Publisher  test_data_pub;
+
+
+        uint32_t forward_separate[2];
         uint8_t group_mode_forward[2][4] = 
                 {
                     {10,11,0xff,0xff},
                     {0,1,12,13},
                     //{13},
                 };
+
+        uint32_t backward_separate[1];
         uint8_t group_mode_backward[1][2] = 
                 {
                     {5,6},
                 };
+
+        uint32_t turning_separate[3];
         uint8_t group_mode_turning[3][6] = 
                 {
                     {10,11,5,6,0xff,0xff},
@@ -183,6 +198,7 @@ class Ultrasonic
         sonar_msgs::sonar_msgs ultrasonic_msgs;
 
         bool is_ultrasonic_can_id(CAN_ID_UNION id);
+        bool is_ultrasonic_work_mode(int mode);
         uint8_t parse_ultrasonic_id(CAN_ID_UNION id);
 };
 

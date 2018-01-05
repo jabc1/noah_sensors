@@ -121,8 +121,9 @@ void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)
     this->pub_to_can_node.publish(can_msg);
 }
 #define BROADCAST_CAN_SRC_ID    0x60
-int Ultrasonic::broadcast_measurement(uint8_t group)     
+int Ultrasonic::broadcast_measurement(uint32_t group)     
 {
+    //ROS_ERROR("%s",__func__);
     int error = 0; 
     mrobot_driver_msgs::vci_can can_msg;
     CAN_ID_UNION id;
@@ -135,10 +136,15 @@ int Ultrasonic::broadcast_measurement(uint8_t group)
     id.CanID_Struct.res = 0;
 
     can_msg.ID = id.CANx_ID;
-    can_msg.DataLen = 2;
-    can_msg.Data.resize(2);
+    can_msg.DataLen = 5;
+    can_msg.Data.resize(5);
     can_msg.Data[0] = 0x00;
-    can_msg.Data[1] = group;
+    *(uint32_t*)&can_msg.Data[1] = group;
+    //ROS_ERROR("group is %d",group);
+    //ROS_ERROR("can_msg.Data[1] is %d",can_msg.Data[1]);
+    //ROS_ERROR("can_msg.Data[2] is %d",can_msg.Data[2]);
+    //ROS_ERROR("can_msg.Data[3] is %d",can_msg.Data[3]);
+    //ROS_ERROR("can_msg.Data[4] is %d",can_msg.Data[4]);
     this->pub_to_can_node.publish(can_msg);
     return error;
 }
@@ -199,6 +205,26 @@ void Ultrasonic::update_measure_en(uint32_t ul_en)
     }
 
 }
+void Ultrasonic::updata_work_mode(void)
+{
+    int work_mode = 0;
+    n.getParam("/noah_sensors/ultrasonic_work_mode",work_mode);
+    if(is_ultrasonic_work_mode(work_mode) == true)
+    {
+        
+    }
+}
+
+
+bool Ultrasonic::is_ultrasonic_work_mode(int mode)
+{
+    if((mode >= ULTRASONIC_MODE_FORWARD) && (mode < ULTRASONIC_MODE_MAX))
+    {
+        return true;
+    }
+    return false;
+}
+
 bool Ultrasonic::is_ultrasonic_can_id(CAN_ID_UNION id)
 {
     if((id.CanID_Struct.SrcMACID >= 0x60)&&(id.CanID_Struct.SrcMACID <= 0x6f))
@@ -328,52 +354,25 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             }
 #endif
 
-            //if(this->is_log_on == true)
-            {
+
 #if 0
-                printf("\n");
-                printf("\n");
-                printf("\n");
-                printf("ultrasonic:                                                           laser:\n");
+
+                printf("ultrasonic: ");
                 for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                 {
-                    printf("%4d ",i + 1);
+                    printf("%3d ",(uint32_t)(this->distance[i]*100));
                 }
-                for(uint8_t i = 0; i < 13; i++)
-                {
-                    printf("%4d ",i + 1);
-                }
-                printf("\n");
-#endif
 
-
-
-
-
-#if 1
-		{
-
-			for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
-			{
-				printf("%4f ",this->distance[i]);
-			}
-			printf("\n");
-		}		
-#endif
-
-
-
-
-
-
-#if 0
 extern uint16_t laser_test_data[13];
+
+                printf("  laser:");
                 for(uint8_t i = 0; i <13; i++)
                 {
-                    printf("%4d ",laser_test_data[i]);
+                    printf("%3d ",(uint32_t)(laser_test_data[i]*100));
                 }
                 printf("\n");
 #endif
+
 
             }
         }
