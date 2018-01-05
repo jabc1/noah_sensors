@@ -72,7 +72,7 @@ int main(int argc, char **argv)
     ros::Duration mode_test_duration(random()%(MODE_TEST_DURATION_MAX - MODE_TEST_DURATION_MIN) + MODE_TEST_DURATION_MIN);//random 100~1000 seconds
     
     //bool ul_init_flag = 0;
-    ultrasonic->work_mode = ULTRASONIC_MODE_FORWARD;
+    ultrasonic->work_mode = ULTRASONIC_MODE_TURNING;
     while(ros::ok())
     {
 

@@ -273,6 +273,12 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 
             distance = msg->Data[0];
             distance += msg->Data[1]<<8;
+
+            if((distance < 3) && (distance > 0))
+            {
+                distance = 3;
+            }
+
             this->distance[ul_id] = double(distance)/100;
 
             if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
@@ -458,11 +464,28 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 {
     uint32_t en_sonar = sonar_en;
     static bool close_all_flag = 0;
+    this->ultrasonic_msgs.header.stamp = ros::Time::now();
+    this->ultrasonic_msgs.header.frame_id = ultrasonic_frame_all;   
+
     this->ultrasonic_data.header.stamp = ros::Time::now();
     this->ultrasonic_data.radiation_type = ULTRASOUND;
     this->ultrasonic_data.field_of_view = 0.61;
     this->ultrasonic_data.min_range = 0.03;
     this->ultrasonic_data.max_range = 2.0;
+
+
+    n.getParam("ultrasonic_test",param_get_test);
+    //ROS_ERROR("param_get_test is %d",param_get_test);
+#if 1
+    this->ultrasonic_msgs.sonars.resize(ultrasonic_real_num - 1);
+    for(int i=0;i<ultrasonic_real_num - 1;i++)
+    {
+        this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
+        this->ultrasonic_data.range = this->distance[i];
+        this->ultrasonic_msgs.sonars[i] = ultrasonic_data;
+    }
+    this->ultrasonic_pub_to_navigation_all.publish(this->ultrasonic_msgs);
+#else 
     if(close_all_flag == 0)
     {
         for(int i=0;i<ultrasonic_real_num - 1;i++)
@@ -506,6 +529,8 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     {
         close_all_flag = 0;
     }
+
+#endif
 
 }
 

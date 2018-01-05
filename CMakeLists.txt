@@ -4,13 +4,22 @@ project(noah_sensors)
 find_package(catkin REQUIRED COMPONENTS
   roscpp
   std_msgs
+  message_generation
   #  mrobot_driver_msgs 
   #  roscan
 )
 
+
+
 catkin_package(
-  CATKIN_DEPENDS roscpp std_msgs
+  CATKIN_DEPENDS roscpp std_msgs  message_runtime
 )
+
+add_message_files(
+  FILES
+  sonar_msgs.msg
+)
+
 
 ###########
 ## Build ##

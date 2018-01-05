@@ -2,6 +2,8 @@
 #include "std_msgs/String.h"
 #include "json.hpp"
 #include <mrobot_driver_msgs/vci_can.h>
+#include <sonar_msgs/sonar_msgs.h>
+//#include <range_sensor_layer/sonar_msgs.h>
 #include <roscan/can_long_frame.h>
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -57,10 +59,12 @@ class Ultrasonic
             work_mode_sub = n.subscribe("ultrasonic_set_work_mode", 10, &Ultrasonic::work_mode_callback, this);
 
             ultrasonic_pub_to_navigation = n.advertise<sensor_msgs::Range>("sonar_msg",20);
+            ultrasonic_pub_to_navigation_all = n.advertise<sonar_msgs::sonar_msgs>("sonar_msg_all",20);
             work_mode_ack_pub = n.advertise<std_msgs::UInt8MultiArray>("ultrasonic_work_mode_ack",20);
             set_work_mode_start_time = ros::Time::now();
 
             group_id_vec.clear();
+            ultrasonic_msgs.sonars.resize(ULTRASONIC_NUM_MAX - 1);
         }
         
         int start_measurement(uint8_t ul_id);
@@ -112,7 +116,10 @@ class Ultrasonic
         std::string version[ULTRASONIC_NUM_MAX];
         sensor_msgs::Range ultrasonic_data;
         ros::Publisher ultrasonic_pub_to_navigation;
+        ros::Publisher ultrasonic_pub_to_navigation_all;
         ros::Publisher work_mode_ack_pub;
+
+        int param_get_test = 0;
 
 
 #if 0
@@ -163,13 +170,17 @@ class Ultrasonic
         ros::Subscriber work_mode_sub;
 
 
+
         ros::Publisher  ultrasonic_pub;
         ros::Publisher  pub_to_can_node;
 
         std::string ultrasonic_frames[ULTRASONIC_NUM_MAX] = {"sonar_frame_0","sonar_frame_1","sonar_frame_2","sonar_frame_3","sonar_frame_4","sonar_frame_5","sonar_frame_6","sonar_frame_7", "sonar_frame_8","sonar_frame_9","sonar_frame_10","sonar_frame_11","sonar_frame_12","sonar_frame_13"};
 
+        std::string ultrasonic_frame_all = "sonar_frame_all";
+
         uint8_t ultrasonic_real_num = ULTRASONIC_NUM_MAX;
         uint32_t measure_en_ack = 0xffffffff;
+        sonar_msgs::sonar_msgs ultrasonic_msgs;
 
         bool is_ultrasonic_can_id(CAN_ID_UNION id);
         uint8_t parse_ultrasonic_id(CAN_ID_UNION id);
