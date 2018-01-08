@@ -78,23 +78,42 @@ int main(int argc, char **argv)
     uint32_t rate = 1000;
     ros::Rate loop_rate(rate);
     uint32_t cnt = 0;
+    bool get_version_init = 0;
     static uint8_t pre_mode = ULTRASONIC_MODE_NONE;
     ros::Time mode_test_start_time = ros::Time::now();
     ros::Duration mode_test_duration(random()%(MODE_TEST_DURATION_MAX - MODE_TEST_DURATION_MIN) + MODE_TEST_DURATION_MIN);//random 100~1000 seconds
 
     ultrasonic->work_mode = ULTRASONIC_MODE_FORWARD;
+    sleep(1.5);
     while(ros::ok())
     {
+        if(get_version_init == 0)
+        {
+            static uint8_t cnt = 0;
+            //for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+            if(cnt < ULTRASONIC_NUM_MAX)
+            {
+                ultrasonic->get_version(cnt); 
+                usleep(1000 * 30);
+                ROS_INFO("start to get ultrasonic %d version",cnt);
+            }
+            else if(cnt < ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
+            {
+                laser->get_version(cnt- ULTRASONIC_NUM_MAX); 
+                usleep(1000 * 30);
+                ROS_INFO("start to get laser %d version",cnt - ULTRASONIC_NUM_MAX);
+            }
+            cnt++;
+            if(cnt == ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
+            {
+                get_version_init = 1; 
+            }
+        }
 
         /*---------------------  test code  --------------------------*/
-        if(ultrasonic->group_init_flag == 0)
+        else if(ultrasonic->is_mode_init == 0)
         {
-            for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
-            {
-                //ultrasonic->get_version(i); 
-                //usleep(1000);
-                //ROS_INFO("start to get ultrasonic %d version",i);
-            }
+            ROS_INFO("start to init work mode ...");
             if(ultrasonic->work_mode == ULTRASONIC_MODE_TURNING)
             {
                 if(pre_mode != ULTRASONIC_MODE_TURNING)
@@ -176,16 +195,18 @@ int main(int argc, char **argv)
 
             std_msgs::UInt8MultiArray ack;
 
-            ultrasonic->group_init_flag = 1;
+            ultrasonic->is_mode_init = 1;
 
             ack.data.push_back(0);
             ack.data.push_back(ultrasonic->work_mode);
             ultrasonic->work_mode_ack_pub.publish(ack);
+            //ultrasonic->ack_work_mode(ultrasonic->work_mode);
+            ros::param::set("/noah_sensors/ultrasonic_work_mode_ack",ultrasonic->work_mode);
         }
 
         /*---------------------  test code  --------------------------*/
 
-        else if(ultrasonic->group_init_flag == 1)
+        else if(ultrasonic->is_mode_init == 1)
         {
 
 #if 1//ultrasonic
@@ -195,7 +216,7 @@ int main(int argc, char **argv)
                 static uint8_t group = 0;
                 if(ultrasonic->work_mode == ULTRASONIC_MODE_FORWARD)
                 {
-                    ultrasonic->broadcast_measurement(ultrasonic->forward_separate[group]);
+                    ultrasonic->broadcast_measurement(ultrasonic->forward_separate[group] & sonar_en);
                     if(group >= sizeof(ultrasonic->group_mode_forward) / sizeof(ultrasonic->group_mode_forward[0]) - 1)
                     {
                         group = 0;
@@ -207,7 +228,7 @@ int main(int argc, char **argv)
                 }
                 else if(ultrasonic->work_mode == ULTRASONIC_MODE_BACKWARD)
                 {
-                    ultrasonic->broadcast_measurement(ultrasonic->backward_separate[group]);
+                    ultrasonic->broadcast_measurement(ultrasonic->backward_separate[group] & sonar_en);
                     if(group >= sizeof(ultrasonic->group_mode_backward) / sizeof(ultrasonic->group_mode_backward[0]) - 1)
                     {
                         group = 0;
@@ -219,7 +240,7 @@ int main(int argc, char **argv)
                 }
                 else if(ultrasonic->work_mode == ULTRASONIC_MODE_TURNING)
                 {
-                    ultrasonic->broadcast_measurement(ultrasonic->turning_separate[group]);
+                    ultrasonic->broadcast_measurement(ultrasonic->turning_separate[group] & sonar_en);
                     if(group >= sizeof(ultrasonic->group_mode_turning) / sizeof(ultrasonic->group_mode_turning[0]) - 1)
                     {
                         group = 0;
@@ -257,7 +278,7 @@ int main(int argc, char **argv)
             if(ros::Time::now() - mode_test_start_time >= ros::Duration(mode_test_duration)) 
             {
                 ultrasonic->work_mode++;
-                ultrasonic->group_init_flag = 0;
+                ultrasonic->is_mode_init = 0;
                 if(ultrasonic->work_mode >= ULTRASONIC_MODE_MAX - 1)
                 {
                     ultrasonic->work_mode = ULTRASONIC_MODE_FORWARD;
@@ -294,7 +315,7 @@ int main(int argc, char **argv)
             {
                 if(cnt % (uint32_t)(rate / 5) == 0)
                 {
-                    ROS_ERROR("hardware test log is on !!!");
+                    //ROS_ERROR("hardware test log is on !!!");
                     ultrasonic->test_data.data.clear();
                     for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                     {

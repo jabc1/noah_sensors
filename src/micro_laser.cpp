@@ -74,6 +74,29 @@ int Laser::start_measurement(uint8_t laser_id)
     return error;
 }
 
+void Laser::get_version(uint8_t ul_id)     
+{
+    if(ul_id >= LASER_NUM_MAX)
+    {
+        return ;
+    }
+    mrobot_driver_msgs::vci_can can_msg;
+    CAN_ID_UNION id;
+    memset(&id, 0x0, sizeof(CAN_ID_UNION));
+    id.CanID_Struct.SourceID = LASER_CAN_SOURCE_ID_GET_VERSION;
+    id.CanID_Struct.SrcMACID = 1;
+    id.CanID_Struct.DestMACID = LASER_CAN_SRC_MAC_ID_BASE+ ul_id;
+    id.CanID_Struct.FUNC_ID = 0x02;
+    id.CanID_Struct.ACK = 0;
+    id.CanID_Struct.res = 0;
+
+    can_msg.ID = id.CANx_ID;
+    can_msg.DataLen = 2;
+    can_msg.Data.resize(2);
+    can_msg.Data[0] = 0x00;
+    can_msg.Data[1] = 0;
+    this->pub_to_can_node.publish(can_msg);
+}
 
 #if 0
 void pub_json_msg_to_app( const nlohmann::json j_msg)
@@ -106,6 +129,39 @@ uint8_t Laser::parse_laser_id(CAN_ID_UNION id)
         return id.CanID_Struct.SrcMACID - LASER_CAN_SRC_MAC_ID_BASE;
     }
     return NOT_LASER_ID;
+}
+
+
+void Laser::pub_json_msg( const nlohmann::json j_msg)
+{
+    std_msgs::String pub_json_msg;
+    std::stringstream ss;
+
+    ss.clear();
+    ss << j_msg;
+    pub_json_msg.data = ss.str();
+    this->version_ack_pub.publish(pub_json_msg);
+}
+
+void Laser::get_mcu_version_callback(const std_msgs::String data)
+{
+    json j;
+    j.clear();
+
+    for(uint8_t i = 0; i < LASER_NUM_MAX; i++)
+    {
+        j = 
+        {
+            {"version_ack","sensors"},
+            {
+                "data",
+                {
+                    {this->laser_num[i], this->version[i]},
+                },
+            }
+        };
+        this->pub_json_msg(j);
+    }
 }
 
 
@@ -156,6 +212,24 @@ void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstP
             laser_test_data[ul_id] = msg->Data[0];
         }
     }
+
+    if(id.CanID_Struct.SourceID == LASER_CAN_SOURCE_ID_GET_VERSION)
+    {
+        uint8_t len;
+        if(id.CanID_Struct.ACK == 1)
+        {   
+            len = msg->Data[0];
+            version[ul_id].resize(len);
+            version[ul_id].clear();
+            for(uint8_t i = 0; i < len; i++)
+            {
+                version[ul_id].push_back(*(char *)&(msg->Data[i+1]));
+            }
+            //memcpy(version[ul_id].cbegin(),&msg->Data[1], len);
+            ROS_WARN("laser %d version is %s",ul_id,version[ul_id].data());
+
+        }
+    }
 }
 
 void Laser::pub_laser_data_to_navigation(double * ul_data)
@@ -165,7 +239,7 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
     this->laser_data.header.stamp = ros::Time::now();
     this->laser_data.radiation_type = INFRARED;
     this->laser_data.field_of_view = 0.2;
-    this->laser_data.min_range = 0.1;
+    this->laser_data.min_range = 0.01;
     this->laser_data.max_range = 1.2;
     if(close_all_flag == 0)
     {
@@ -177,7 +251,7 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
 
                 if(i >= 3)
                 {
-                    this->laser_data.min_range = 0.1;
+                    this->laser_data.min_range = 0.01;
                     this->laser_data.max_range = 1.2;
                 }
                 this->laser_data.header.frame_id = this->laser_frames[i];
@@ -191,7 +265,7 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
 
                 if(i >= 3)
                 {
-                    this->laser_data.min_range = 0.1;
+                    this->laser_data.min_range = 0.01;
                     this->laser_data.max_range = 1.2;
                 }
                 this->laser_data.header.frame_id = this->laser_frames[i];

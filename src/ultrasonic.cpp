@@ -177,16 +177,6 @@ int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
     return error;
 }
 
-void pub_json_msg_to_app( const nlohmann::json j_msg)
-{
-    std_msgs::String pub_json_msg;
-    std::stringstream ss;
-
-    ss.clear();
-    ss << j_msg;
-    pub_json_msg.data = ss.str();
-    //this->noah_powerboard_pub.publish(pub_json_msg);
-}
 
 void Ultrasonic::update_measure_en(uint32_t ul_en)
 {
@@ -199,22 +189,12 @@ void Ultrasonic::update_measure_en(uint32_t ul_en)
             if( (ul_en^measure_en_ack) &(1<<i) ) 
             {
                 this->ultrasonic_en(i,(ul_en>>i) &0x01);
-                ROS_ERROR("set %d to %d",i, (ul_en>>i) &0x01);
+                //ROS_ERROR("set %d to %d",i, (ul_en>>i) &0x01);
             }
         }
     }
 
 }
-void Ultrasonic::updata_work_mode(void)
-{
-    int work_mode = 0;
-    n.getParam("/noah_sensors/ultrasonic_work_mode",work_mode);
-    if(is_ultrasonic_work_mode(work_mode) == true)
-    {
-        
-    }
-}
-
 
 bool Ultrasonic::is_ultrasonic_work_mode(int mode)
 {
@@ -224,6 +204,56 @@ bool Ultrasonic::is_ultrasonic_work_mode(int mode)
     }
     return false;
 }
+
+void Ultrasonic::updata_work_mode(void)
+{
+    int get_work_mode = 0;
+    n.getParam("/noah_sensors/ultrasonic_work_mode",get_work_mode);
+    if(is_ultrasonic_work_mode(get_work_mode) == true)
+    {
+        if(this->work_mode != get_work_mode)    
+        {
+            ROS_INFO("change work mode from %d to %d",this->work_mode,get_work_mode);
+            this->work_mode = get_work_mode; 
+            this->is_mode_init = 0;
+        }
+    }
+}
+
+
+void Ultrasonic::pub_json_msg( const nlohmann::json j_msg)
+{
+    std_msgs::String pub_json_msg;
+    std::stringstream ss;
+
+    ss.clear();
+    ss << j_msg;
+    pub_json_msg.data = ss.str();
+    this->version_ack_pub.publish(pub_json_msg);
+}
+
+
+void Ultrasonic::get_mcu_version_callback(const std_msgs::String data)
+{
+    json j;
+    j.clear();
+
+    for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+    {
+        j = 
+        {
+            {"version_ack","sensors"},
+            {
+                "data",
+                {
+                    {this->ultrasonic_num[i], this->version[i]},
+                },
+            }
+        };
+        this->pub_json_msg(j);
+    }
+}
+
 
 bool Ultrasonic::is_ultrasonic_can_id(CAN_ID_UNION id)
 {
@@ -355,8 +385,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 #endif
 
 
-#if 0
-
+#if 1
                 printf("ultrasonic: ");
                 for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                 {
@@ -373,8 +402,6 @@ extern uint16_t laser_test_data[13];
                 printf("\n");
 #endif
 
-
-            }
         }
     }
     
@@ -452,7 +479,7 @@ void Ultrasonic::work_mode_callback(const std_msgs::UInt8MultiArray set_mode)
         if((set_mode.data[0] < ULTRASONIC_MODE_MAX) && (set_mode.data[0] >= 0))
         {
             this->work_mode = set_mode.data[0];
-            this->group_init_flag = 0;
+            this->is_mode_init = 0;
             this->set_work_mode_start_time = ros::Time::now();
         }
     }
@@ -469,7 +496,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     this->ultrasonic_data.header.stamp = ros::Time::now();
     this->ultrasonic_data.radiation_type = ULTRASOUND;
     this->ultrasonic_data.field_of_view = 0.61;
-    this->ultrasonic_data.min_range = 0.03;
+    this->ultrasonic_data.min_range = 0.01;
     this->ultrasonic_data.max_range = 2.0;
 
 
@@ -484,7 +511,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
         this->ultrasonic_msgs.sonars[i] = ultrasonic_data;
     }
     this->ultrasonic_pub_to_navigation_all.publish(this->ultrasonic_msgs);
-#else 
+
     if(close_all_flag == 0)
     {
         for(int i=0;i<ultrasonic_real_num - 1;i++)
@@ -495,7 +522,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 
                 if(i >= 3)
                 {
-                    this->ultrasonic_data.min_range = 0.03;
+                    this->ultrasonic_data.min_range = 0.01;
                     this->ultrasonic_data.max_range = 2.0;
                 }
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
@@ -509,7 +536,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 
                 if(i >= 3)
                 {
-                    this->ultrasonic_data.min_range = 0.03;
+                    this->ultrasonic_data.min_range = 0.01;
                     this->ultrasonic_data.max_range = 2.0;
                 }
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];

@@ -9,14 +9,17 @@
 #include <sensor_msgs/PointCloud2.h>
 #include <common.h>
 
+using json = nlohmann::json;
+
 #ifndef _ULTRASONIC__H
 #define _ULTRASONIC__H
 
 #define ULTRASONIC_CAN_SRC_MAC_ID_BASE      0x60
 
+#define CAN_SOURCE_ID_GET_VERSION           0x01
+
 #define CAN_SOURCE_ID_START_MEASUREMENT     0x80
 #define CAN_SOURCE_ID_MEASUREMENT_EN        0x81
-#define CAN_SOURCE_ID_GET_VERSION           0x82
 #define CAN_SOURCE_ID_SET_GROUP             0x83
 
 #define ULTRASONIC_NUM_MAX                  14 
@@ -55,9 +58,14 @@ class Ultrasonic
             //ultrasonic_pub = n.advertise<std_msgs::String>("ultrasonic_to_can",1000);
             sensor_en = n.subscribe("/map_server_mrobot/region_params_changer/sensor_params",1000,sensor_en_cb);
             pub_to_can_node = n.advertise<mrobot_driver_msgs::vci_can>("ultrasonic_to_can", 1000);
+            version_ack_pub = n.advertise<std_msgs::String>("mcu_version_ack", 1000);
+
             sub_from_can_node = n.subscribe("can_to_ultrasonic", 1000, &Ultrasonic::rcv_from_can_node_callback, this);
 
             work_mode_sub = n.subscribe("ultrasonic_set_work_mode", 10, &Ultrasonic::work_mode_callback, this);
+
+            get_mcu_version_sub = n.subscribe("get_mcu_version", 10, &Ultrasonic::get_mcu_version_callback, this);
+
 
             ultrasonic_pub_to_navigation = n.advertise<sensor_msgs::Range>("sonar_msg",20);
             ultrasonic_pub_to_navigation_all = n.advertise<sonar_msgs::sonar_msgs>("sonar_msg_all",20);
@@ -78,12 +86,14 @@ class Ultrasonic
         int set_group(uint8_t ul_id, uint8_t group);
         void rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg);
         void work_mode_callback(const std_msgs::UInt8MultiArray data);
+        void get_mcu_version_callback(const std_msgs::String data);
         void update_status(void);
         void pub_ultrasonic_data_to_navigation(double *data);
         void update_measure_en(uint32_t ul_en);
         void updata_work_mode(void);
+        //void ack_work_mode(
 
-        uint8_t group_init_flag = 0;
+        uint8_t is_mode_init = 0;
         bool is_log_on;
         can_long_frame  long_frame;
         ros::Time start_measure_time[ULTRASONIC_NUM_MAX];
@@ -93,6 +103,8 @@ class Ultrasonic
         uint8_t work_mode = ULTRASONIC_MODE_FORWARD;
         uint32_t current_work_mode_ul = 0;
 
+        json j;
+        void pub_json_msg(const nlohmann::json j_msg);
 
         std_msgs::UInt8MultiArray test_data;
         ros::Publisher  test_data_pub;
@@ -183,12 +195,15 @@ class Ultrasonic
         ros::Subscriber sub_from_can_node;
         ros::Subscriber sensor_en;
         ros::Subscriber work_mode_sub;
+        ros::Subscriber get_mcu_version_sub;
 
 
 
         ros::Publisher  ultrasonic_pub;
         ros::Publisher  pub_to_can_node;
+        ros::Publisher  version_ack_pub;
 
+        std::string ultrasonic_num[ULTRASONIC_NUM_MAX] = {"ultrasonic_0","ultrasonic_1","ultrasonic_2","ultrasonic_3","ultrasonic_4","ultrasonic_5","ultrasonic_6","ultrasonic_7", "ultrasonic_8","ultrasonic_9","ultrasonic_10","ultrasonic_11","ultrasonic_12","ultrasonic_13"};
         std::string ultrasonic_frames[ULTRASONIC_NUM_MAX] = {"sonar_frame_0","sonar_frame_1","sonar_frame_2","sonar_frame_3","sonar_frame_4","sonar_frame_5","sonar_frame_6","sonar_frame_7", "sonar_frame_8","sonar_frame_9","sonar_frame_10","sonar_frame_11","sonar_frame_12","sonar_frame_13"};
 
         std::string ultrasonic_frame_all = "sonar_frame_all";
