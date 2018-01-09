@@ -23,7 +23,7 @@ using json = nlohmann::json;
 #define CAN_SOURCE_ID_SET_GROUP             0x83
 
 #define ULTRASONIC_NUM_MAX                  14 
-#define FILTER_BUF_SIZE                     3 
+#define FILTER_BUF_SIZE                     2 
 
 #define GROUP_PERIOD                        100//ms
 
@@ -202,6 +202,9 @@ class Ultrasonic
         ros::Publisher  ultrasonic_pub;
         ros::Publisher  pub_to_can_node;
         ros::Publisher  version_ack_pub;
+
+
+        std::string ultrasonic_version_param[ULTRASONIC_NUM_MAX] = {"mcu_ultrasonic_0_version","mcu_ultrasonic_1_version","mcu_ultrasonic_2_version","mcu_ultrasonic_3_version","mcu_ultrasonic_4_version","mcu_ultrasonic_5_version","mcu_ultrasonic_6_version","mcu_ultrasonic_7_version", "mcu_ultrasonic_8_version","mcu_ultrasonic_9_version","mcu_ultrasonic_10_version","mcu_ultrasonic_11_version","mcu_ultrasonic_12_version","mcu_ultrasonic_13_version"};
 
         std::string ultrasonic_num[ULTRASONIC_NUM_MAX] = {"ultrasonic_0","ultrasonic_1","ultrasonic_2","ultrasonic_3","ultrasonic_4","ultrasonic_5","ultrasonic_6","ultrasonic_7", "ultrasonic_8","ultrasonic_9","ultrasonic_10","ultrasonic_11","ultrasonic_12","ultrasonic_13"};
         std::string ultrasonic_frames[ULTRASONIC_NUM_MAX] = {"sonar_frame_0","sonar_frame_1","sonar_frame_2","sonar_frame_3","sonar_frame_4","sonar_frame_5","sonar_frame_6","sonar_frame_7", "sonar_frame_8","sonar_frame_9","sonar_frame_10","sonar_frame_11","sonar_frame_12","sonar_frame_13"};

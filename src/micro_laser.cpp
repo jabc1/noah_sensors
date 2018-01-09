@@ -226,6 +226,7 @@ void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstP
                 version[ul_id].push_back(*(char *)&(msg->Data[i+1]));
             }
             //memcpy(version[ul_id].cbegin(),&msg->Data[1], len);
+	    n.setParam(laser_version_param[ul_id],version[ul_id]);
             ROS_WARN("laser %d version is %s",ul_id,version[ul_id].data());
 
         }

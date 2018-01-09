@@ -76,6 +76,8 @@ class Laser
 	ros::Publisher  version_ack_pub;
 	std::string version[LASER_NUM_MAX];
 
+std::string laser_version_param[LASER_NUM_MAX] = {"mcu_laser_0_version","mcu_laser_1_version","mcu_laser_2_version","mcu_laser_3_version","mcu_laser_4_version","mcu_laser_5_version","mcu_laser_6_version","mcu_laser_7_version", "mcu_laser_8_version","mcu_laser_9_version","mcu_laser_10_version","mcu_laser_11_version","mcu_laser_12_version"};
+
 std::string laser_num[LASER_NUM_MAX] = {"laser_0","laser_1","laser_2","laser_3","laser_4","laser_5","laser_6","laser_7", "laser_8","laser_9","laser_10","laser_11","laser_12"};
 
 

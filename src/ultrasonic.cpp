@@ -336,7 +336,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             }
 
             this->distance[ul_id] = double(distance)/100;
-
+#if 0
             if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
                 this->distance[ul_id] = DISTANCE_MAX;
@@ -356,7 +356,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                     this->distance[ul_id] = DISTANCE_MAX;
                 }
             }
-
+#endif
             measure_en_ack |= 1<<ul_id; //we can receive measurement data, so this ultrasonic is enable !
 
             if(cnt < FILTER_BUF_SIZE - 1)
@@ -465,6 +465,7 @@ extern uint16_t laser_test_data[13];
                 version[ul_id].push_back(*(char *)&(msg->Data[i+1]));
             }
             //memcpy(version[ul_id].cbegin(),&msg->Data[1], len);
+            n.setParam(ultrasonic_version_param[ul_id],version[ul_id]);
             ROS_WARN("ultrasonic %d version is %s",ul_id,version[ul_id].data());
 
         }
