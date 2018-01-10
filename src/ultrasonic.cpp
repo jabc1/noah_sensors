@@ -213,7 +213,7 @@ void Ultrasonic::updata_work_mode(void)
     {
         if(this->work_mode != get_work_mode)    
         {
-            ROS_INFO("change work mode from %d to %d",this->work_mode,get_work_mode);
+            ROS_WARN("change work mode from %d to %d",this->work_mode,get_work_mode);
             this->work_mode = get_work_mode; 
             this->is_mode_init = 0;
         }
@@ -336,6 +336,10 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             }
 
             this->distance[ul_id] = double(distance)/100;
+            if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
+            {
+                this->distance[ul_id] = DISTANCE_MAX;
+            }
 #if 0
             if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
@@ -385,11 +389,11 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 #endif
 
 
-#if 1
+#if 0
                 printf("ultrasonic: ");
                 for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                 {
-                    printf("%3d ",(uint32_t)(this->distance[i]*100));
+                    printf("%3d ",(uint8_t)(this->distance[i]*100));
                 }
 
 extern uint16_t laser_test_data[13];
@@ -397,7 +401,7 @@ extern uint16_t laser_test_data[13];
                 printf("  laser:");
                 for(uint8_t i = 0; i <13; i++)
                 {
-                    printf("%3d ",(uint32_t)(laser_test_data[i]*100));
+                    printf("%3d ",(uint8_t)(laser_test_data[i]));
                 }
                 printf("\n");
 #endif

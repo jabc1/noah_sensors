@@ -5,7 +5,8 @@
 #include <roscan/can_long_frame.h>
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/PointCloud2.h>
-
+#include <sonar_msgs/sonar_msgs.h>
+//#include <range_sensor_layer/sonar_msgs.h>
 using json = nlohmann::json;
 
 #ifndef _LASER__H
@@ -42,6 +43,7 @@ class Laser
             pub_to_can_node = n.advertise<mrobot_driver_msgs::vci_can>("laser_to_can", 1000);
             sub_from_can_node = n.subscribe("can_to_micro_laser", 1000, &Laser::rcv_from_can_node_callback, this);
             pub_to_navigation = n.advertise<sensor_msgs::Range>("laser_msg",20);
+laser_pub_to_navigation_all = n.advertise<sonar_msgs::sonar_msgs>("laser_msg_all",20);
 	    version_ack_pub = n.advertise<std_msgs::String>("mcu_version_ack", 1000);
 	    get_mcu_version_sub = n.subscribe("get_mcu_version", 10, &Laser::get_mcu_version_callback, this);
         }
@@ -63,8 +65,8 @@ class Laser
         ros::Publisher lasercloud_pub;
         ros::Publisher laser_pub;
         ros::Publisher pub_to_navigation;
-
-
+ros::Publisher laser_pub_to_navigation_all;
+sonar_msgs::sonar_msgs laser_msgs;
 
     private:
         ros::NodeHandle n;
@@ -83,6 +85,7 @@ std::string laser_num[LASER_NUM_MAX] = {"laser_0","laser_1","laser_2","laser_3",
 
         std::string laser_frames[LASER_NUM_MAX] = {"laser_frame_0","laser_frame_1","laser_frame_2","laser_frame_3","laser_frame_4","laser_frame_5","laser_frame_6","laser_frame_7","laser_frame_8","laser_frame_9","laser_frame_10","laser_frame_11","laser_frame_12"};
 
+std::string laser_frame_all = "laser_frame_all";
         //uint32_t laser_en = 0xffffffff;
         uint8_t laser_real_num = LASER_NUM_MAX;
 

@@ -242,6 +242,31 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
     this->laser_data.field_of_view = 0.2;
     this->laser_data.min_range = 0.01;
     this->laser_data.max_range = 1.2;
+
+
+    this->laser_msgs.header.stamp = ros::Time::now();
+    this->laser_msgs.header.frame_id = laser_frame_all;   
+
+
+
+    //n.getParam("ultrasonic_test",param_get_test);
+    //ROS_ERROR("param_get_test is %d",param_get_test);
+
+    this->laser_msgs.sonars.resize(laser_real_num - 1);
+    for(int i=0;i<laser_real_num - 1;i++)
+    {
+        this->laser_data.header.frame_id = this->laser_frames[i];
+        this->laser_data.range = this->distance[i];
+        this->laser_msgs.sonars[i] = laser_data;
+    }
+    this->laser_pub_to_navigation_all.publish(this->laser_msgs);
+
+
+
+
+
+
+
     if(close_all_flag == 0)
     {
         for(int i=0;i<laser_real_num;i++)

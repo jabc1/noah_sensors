@@ -24,7 +24,7 @@
 #include <hall.h>
 #include <common.h>
 #include<stdlib.h>
-uint16_t laser_test_data[13] = {0};
+uint16_t laser_test_data[LASER_NUM_MAX] = {0};
 void sigintHandler(int sig)
 {
     ROS_INFO("killing on exit");
@@ -91,20 +91,20 @@ int main(int argc, char **argv)
         {
             static uint8_t cnt = 0;
             //for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
-            if(cnt < ULTRASONIC_NUM_MAX)
+            if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)< ULTRASONIC_NUM_MAX)
             {
-                ultrasonic->get_version(cnt); 
+                ultrasonic->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)); 
                 usleep(1000 * 30);
-                ROS_INFO("start to get ultrasonic %d version",cnt);
+                ROS_INFO("start to get ultrasonic %d version",cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX));
             }
-            else if(cnt < ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
+            else if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX) < ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
             {
-                laser->get_version(cnt- ULTRASONIC_NUM_MAX); 
+                laser->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX); 
                 usleep(1000 * 30);
-                ROS_INFO("start to get laser %d version",cnt - ULTRASONIC_NUM_MAX);
+                ROS_INFO("start to get laser %d version",cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX);
             }
             cnt++;
-            if(cnt == ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
+            if(cnt >= 3*(ULTRASONIC_NUM_MAX + LASER_NUM_MAX))
             {
                 get_version_init = 1; 
             }
@@ -113,7 +113,7 @@ int main(int argc, char **argv)
         /*---------------------  test code  --------------------------*/
         else if(ultrasonic->is_mode_init == 0)
         {
-            ROS_INFO("start to init work mode ...");
+            ROS_WARN("start to init work mode ...");
             if(ultrasonic->work_mode == ULTRASONIC_MODE_TURNING)
             {
                 if(pre_mode != ULTRASONIC_MODE_TURNING)
@@ -319,11 +319,11 @@ int main(int argc, char **argv)
                     ultrasonic->test_data.data.clear();
                     for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                     {
-                        ultrasonic->test_data.data.push_back((uint32_t)(ultrasonic->distance[i]*100));
+                        ultrasonic->test_data.data.push_back((uint8_t)(ultrasonic->distance[i]*100));
                     }
                     for(uint8_t i = 0; i < LASER_NUM_MAX; i++)
                     {
-                        ultrasonic->test_data.data.push_back((uint32_t)(laser_test_data[i]*100));
+                        ultrasonic->test_data.data.push_back((uint8_t)(laser_test_data[i]));
                     }
                     ultrasonic->test_data_pub.publish(ultrasonic->test_data);
                 }
