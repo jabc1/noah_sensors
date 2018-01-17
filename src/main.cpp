@@ -294,7 +294,7 @@ int main(int argc, char **argv)
 #if 1 //laser
             if(cnt % (uint32_t)(rate / 70) == 0)
             {   
-                static uint8_t i = 0;
+                static uint32_t i = 0;
                 if(laser_en & (1<<(i % LASER_NUM_MAX)))                    
                     laser->start_measurement(i % LASER_NUM_MAX);
                 i++;
@@ -307,9 +307,10 @@ int main(int argc, char **argv)
 #endif
 
 
-            if(cnt % (uint32_t)(rate / 5) == 0)
+            if(cnt % (uint32_t)(rate / 10) == 0)
             {
                 ultrasonic->updata_work_mode();
+                ultrasonic->updata_measure_range();
             }
             if(test_log_on)
             {

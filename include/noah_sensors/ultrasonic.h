@@ -28,6 +28,7 @@ using json = nlohmann::json;
 #define GROUP_PERIOD                        100//ms
 
 #define DISTANCE_MAX                        2.00
+#define DISTANCE_MIN                        0.01
 #define ERR_COMMUNICATE_TIME_OUT            1
 #define DISTANCE_ERR_TIME_OUT               2.55 
 
@@ -91,6 +92,7 @@ class Ultrasonic
         void pub_ultrasonic_data_to_navigation(double *data);
         void update_measure_en(uint32_t ul_en);
         void updata_work_mode(void);
+        void updata_measure_range(void);
         //void ack_work_mode(
 
         uint8_t is_mode_init = 0;
@@ -118,22 +120,24 @@ class Ultrasonic
                     //{13},
                 };
 
-        uint32_t backward_separate[1];
-        uint8_t group_mode_backward[1][2] = 
+        uint32_t backward_separate[2];
+        uint8_t group_mode_backward[2][2] = 
                 {
                     {5,6},
+                    {0xff,0xff},
                 };
 
         uint32_t turning_separate[3];
         uint8_t group_mode_turning[3][6] = 
                 {
-                    {10,11,5,6,0xff,0xff},
-                    {0,1,12,13,0xff,0xff},
-                    {2,4,3,7,8,9}
+                    {  10,  11,   5,   6,0xff,0xff},
+                    {   0,   1,  12,  13,0xff,0xff},
+                    {   2,   4,   3,   7,   8,   9}
                 };
 
         vector<group_id_t> group_id_vec;
-        double max_distance = DISTANCE_MAX;
+        double max_range = DISTANCE_MAX;
+        double min_range = DISTANCE_MIN;
         double distance[ULTRASONIC_NUM_MAX] = {0};
         double distance_buf[ULTRASONIC_NUM_MAX][FILTER_BUF_SIZE] = {{0}};
         uint8_t distance_buf_proc[ULTRASONIC_NUM_MAX][FILTER_BUF_SIZE] = {{0}};

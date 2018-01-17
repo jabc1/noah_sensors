@@ -220,6 +220,23 @@ void Ultrasonic::updata_work_mode(void)
     }
 }
 
+void Ultrasonic::updata_measure_range(void)
+{
+    static double max_range_tmp = 0;
+    static double min_range_tmp = 0;
+    n.getParam("/noah_sensors/ultrasonic/max_range",this->max_range);
+    n.getParam("/noah_sensors/ultrasonic/min_range",this->min_range);
+    if(max_range > min_range + 0.0001) 
+    {
+        if((abs(max_range_tmp - max_range) > 0.0001) || (abs(min_range_tmp - min_range) > 0.0001))
+        {
+            ROS_WARN("change max_range from %f to %f",max_range_tmp,this->max_range);
+            ROS_WARN("change min_range from %f to %f",min_range_tmp,this->min_range);
+        }
+        max_range_tmp = this->max_range;
+        min_range_tmp = this->min_range;
+    }
+}
 
 void Ultrasonic::pub_json_msg( const nlohmann::json j_msg)
 {
@@ -336,9 +353,13 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             }
 
             this->distance[ul_id] = double(distance)/100;
-            if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
+            if((this->distance[ul_id] >= this->max_range - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
-                this->distance[ul_id] = DISTANCE_MAX;
+                this->distance[ul_id] = this->max_range;
+            }
+            if(this->distance[ul_id] <= this->min_range + 0.00001)
+            {
+                this->distance[ul_id] = this->min_range;
             }
 #if 0
             if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
@@ -501,8 +522,8 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     this->ultrasonic_data.header.stamp = ros::Time::now();
     this->ultrasonic_data.radiation_type = ULTRASOUND;
     this->ultrasonic_data.field_of_view = 0.61;
-    this->ultrasonic_data.min_range = 0.01;
-    this->ultrasonic_data.max_range = 2.0;
+    this->ultrasonic_data.min_range = this->min_range;
+    this->ultrasonic_data.max_range = this->max_range;
 
 
     n.getParam("ultrasonic_test",param_get_test);
@@ -527,22 +548,22 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 
                 if(i >= 3)
                 {
-                    this->ultrasonic_data.min_range = 0.01;
-                    this->ultrasonic_data.max_range = 2.0;
+                    this->ultrasonic_data.min_range = this->min_range;
+                    this->ultrasonic_data.max_range = this->max_range;
                 }
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
                 this->ultrasonic_data.range = 5.0;
                 usleep(2000);
                 this->ultrasonic_pub_to_navigation.publish(this->ultrasonic_data);
             }
-            else if( (en_sonar & (0x00000001<<i))/* && (current_work_mode_ul & (0x000000001 << i))*/ )
+            else if( (en_sonar & (0x00000001<<i)) && (current_work_mode_ul & (0x000000001 << i)) )
             {
                 close_all_flag = 0;
 
                 if(i >= 3)
                 {
-                    this->ultrasonic_data.min_range = 0.01;
-                    this->ultrasonic_data.max_range = 2.0;
+                    this->ultrasonic_data.min_range = this->min_range;
+                    this->ultrasonic_data.max_range = this->max_range;
                 }
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
                 this->ultrasonic_data.range = this->distance[i];
