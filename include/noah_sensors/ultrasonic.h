@@ -133,6 +133,8 @@ class Ultrasonic
                     {  10,  11,   5,   6,0xff,0xff},
                     {   0,   1,  12,  13,0xff,0xff},
                     {   2,   4,   3,   7,   8,   9}
+                    //{   2,   4,   3,0xff,0xff,0xff},
+                    //{   7,   8,   9,0xff,0xff,0xff}
                 };
 
         vector<group_id_t> group_id_vec;

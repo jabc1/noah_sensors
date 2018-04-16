@@ -75,6 +75,29 @@ int main(int argc, char **argv)
     Ultrasonic *ultrasonic = new Ultrasonic(is_log_on); 
     Laser *laser = new Laser(is_log_on); 
     Hall *hall = new Hall(is_log_on); 
+
+    if(ros::param::has("/noah_sensors/ultrasonic/max_range"))
+    {
+        ros::param::get("/noah_sensors/ultrasonic/max_range",ultrasonic->max_range);
+        ROS_INFO("ultrasonic max range is %f",ultrasonic->max_range);
+    }
+    else
+    {
+        ultrasonic->max_range = 2.0;
+        ROS_WARN("ultrasonic: default max range 2.00");
+    }
+
+    if(ros::param::has("/noah_sensors/ultrasonic/min_range"))
+    {
+        ros::param::get("/noah_sensors/ultrasonic/min_range",ultrasonic->min_range);
+        ROS_INFO("ultrasonic max range is %f",ultrasonic->min_range);
+    }
+    else
+    {
+        ultrasonic->max_range = 0.03;
+        ROS_WARN("ultrasonic: default min range 0.03");
+    }
+
     uint32_t rate = 1000;
     ros::Rate loop_rate(rate);
     uint32_t cnt = 0;

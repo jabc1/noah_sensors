@@ -414,7 +414,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                 printf("ultrasonic: ");
                 for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                 {
-                    printf("%3d ",(uint8_t)(this->distance[i]*100));
+                    printf("%4d ",(uint16_t)(this->distance[i]*100));
                 }
 
 extern uint16_t laser_test_data[13];
