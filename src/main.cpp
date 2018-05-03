@@ -333,6 +333,10 @@ int main(int argc, char **argv)
             if(cnt % (uint32_t)(rate / 10) == 0)
             {
                 ultrasonic->updata_work_mode();
+                //ultrasonic->updata_measure_range();
+            }
+            if(cnt % (uint32_t)(rate / 3) == 0)
+            {
                 ultrasonic->updata_measure_range();
             }
             if(test_log_on)
