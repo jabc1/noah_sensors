@@ -37,7 +37,7 @@
 
 void Ultrasonic::update_status(void)
 {
-    for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+    for(uint8_t i = 0; i < ultrasonic_real_num; i++)
     {
         if(ros::Time::now() - start_measure_time[i] >= ros::Duration(1.5))
         {
@@ -99,7 +99,7 @@ int Ultrasonic::start_measurement(uint8_t ul_id)
 
 void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)     
 {
-    if(ul_id >= ULTRASONIC_NUM_MAX)
+    if(ul_id >= ultrasonic_real_num)
     {
         return ;
     }
@@ -152,7 +152,7 @@ int Ultrasonic::broadcast_measurement(uint32_t group)
 int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)     
 {
     int error = 0; 
-    if(ul_id >= ULTRASONIC_NUM_MAX)
+    if(ul_id >= ultrasonic_real_num)
     {
         ROS_ERROR("ul_id is not right, set group failed ! !");
         return -1;
@@ -180,11 +180,11 @@ int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
 
 void Ultrasonic::update_measure_en(uint32_t ul_en)
 {
-    if(ul_en<<(32 - ULTRASONIC_NUM_MAX) == measure_en_ack<<(32 - ULTRASONIC_NUM_MAX)) 
+    if(ul_en<<(32 - ultrasonic_real_num) == measure_en_ack<<(32 - ultrasonic_real_num)) 
         return;
     if(ros::Time::now() - sensor_en_start_time < ros::Duration(4))
     {
-        for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+        for(uint8_t i = 0; i < ultrasonic_real_num; i++)
         {
             if( (ul_en^measure_en_ack) &(1<<i) ) 
             {
@@ -252,7 +252,7 @@ int Ultrasonic::get_machine_version(void)
     if(machine_version.compare( "EVT-5-1") < 0)
     {
         ROS_INFO("14 ultrasonic");
-        ultrasonic_real_num = 16;
+        ultrasonic_real_num = 14;
         int group_mode_forward_tmp[2][4] =
         {
             {10,11,0xff,0xff},
@@ -384,7 +384,7 @@ void Ultrasonic::get_mcu_version_callback(const std_msgs::String data)
     json j;
     j.clear();
 
-    for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+    for(uint8_t i = 0; i < ultrasonic_real_num; i++)
     {
         j = 
         {
@@ -457,7 +457,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
         ROS_ERROR("ultrasonic CAN id not right");
         return ; 
     }
-    if(ul_id >= ULTRASONIC_NUM_MAX)
+    if(ul_id >= ultrasonic_real_num)
     {
         ROS_ERROR("wtf ! ! !");
         return;
@@ -530,10 +530,12 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                 if( (abs(this->distance[13]) >= 0.000001)  &&  (abs(this->distance[12]) >= 0.000001) )
                 {
                     this->distance[12] = min(this->distance[12],this->distance[13]);
+                    this->distance[13] = this->distance[12];
                 }
                 else
                 {
                     this->distance[12] = max(this->distance[12],this->distance[13]);
+                    this->distance[13] = this->distance[12];
                 }
             }
 #endif
@@ -541,12 +543,12 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 
 #if 0   //sensors data log
                 //printf("ultrasonic: ");
-                for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+                for(uint8_t i = 0; i < ultrasonic_real_num; i++)
                 {
                     printf("%4d ",i+1);
                 }
                 printf("\n");
-                for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+                for(uint8_t i = 0; i < ultrasonic_real_num; i++)
                 {
                     printf("%4d ",(uint16_t)(this->distance[i]*100));
                 }

@@ -103,6 +103,7 @@ int main(int argc, char **argv)
     ros::Rate loop_rate(rate);
     uint32_t cnt = 0;
     bool get_mcu_version_init = 0;
+    bool get_machine_version_init = 0;
     static uint8_t pre_mode = ULTRASONIC_MODE_NONE;
     ros::Time mode_test_start_time = ros::Time::now();
     ros::Duration mode_test_duration(random()%(MODE_TEST_DURATION_MAX - MODE_TEST_DURATION_MIN) + MODE_TEST_DURATION_MIN);//random 100~1000 seconds
@@ -133,7 +134,14 @@ int main(int argc, char **argv)
                 get_mcu_version_init = 1; 
             }
         }
-
+        if(get_machine_version_init == 0 )
+        {
+            if(ultrasonic->get_machine_version() < 0)
+            {
+                ROS_ERROR("Failed to get machine version ! Using default machine version EVT5-1 !");
+            }
+            get_machine_version_init = 1;
+        }
         /*---------------------  test code  --------------------------*/
         else if(ultrasonic->is_mode_init == 0)
         {
