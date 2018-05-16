@@ -238,6 +238,135 @@ void Ultrasonic::updata_measure_range(void)
     }
 }
 
+int Ultrasonic::get_machine_version(void)
+{
+    if(ros::param::has("/noah_machine_version"))
+    {
+        ros::param::get("/noah_machine_version",machine_version);
+        ROS_INFO("get noah machine version: %s",machine_version.data());
+    }
+    else
+        return -1;
+
+    //ROS_INFO("compare result: %d",ultrasonic->machine_version.compare( "EVT-5-1"));
+    if(machine_version.compare( "EVT-5-1") < 0)
+    {
+        ROS_INFO("14 ultrasonic");
+        ultrasonic_real_num = 16;
+        int group_mode_forward_tmp[2][4] =
+        {
+            {10,11,0xff,0xff},
+            {0,1,12,13},
+        };
+
+        int group_mode_backward_tmp[2][2] =
+        {
+            {5,6},
+            {0xff,0xff},
+        };
+
+        int group_mode_turning_tmp[3][6] =
+        {
+            {  10,  11,   5,   6,0xff,0xff},
+            {   0,   1,  12,  13,0xff,0xff},
+            {   2,   4,   3,   7,   8,   9}
+        };
+
+        memcpy(group_mode_forward,group_mode_forward_tmp, sizeof(group_mode_forward_tmp));
+        memcpy(group_mode_backward,group_mode_backward_tmp, sizeof(group_mode_backward_tmp));
+        memcpy(group_mode_turning,group_mode_turning_tmp, sizeof(group_mode_turning_tmp));
+
+        std::cout<<"forward group"<<endl;
+        for(int i = 0; i < sizeof(group_mode_forward_tmp)/sizeof(group_mode_forward_tmp[0]); i++)
+        {
+            for(int j = 0; j < sizeof(group_mode_forward_tmp[0])/sizeof(group_mode_forward_tmp[0][0]); j++)
+            {
+                std::cout<<group_mode_forward[i][j]<<",";
+            }
+            std::cout<<std::endl;
+        }
+
+        std::cout<<"backward group"<<endl;
+        for(int i = 0; i < sizeof(group_mode_backward_tmp)/sizeof(group_mode_backward_tmp[0]); i++)
+        {
+            for(int j = 0; j < sizeof(group_mode_backward_tmp[0])/sizeof(group_mode_backward_tmp[0][0]); j++)
+            {
+                std::cout<<group_mode_backward[i][j]<<",";
+            }
+            std::cout<<std::endl;
+        }
+
+        std::cout<<"turning group"<<endl;
+        for(int i = 0; i < sizeof(group_mode_turning_tmp)/sizeof(group_mode_turning_tmp[0]); i++)
+        {
+            for(int j = 0; j < sizeof(group_mode_turning_tmp[0])/sizeof(group_mode_turning_tmp[0][0]); j++)
+            {
+                std::cout<<group_mode_turning[i][j]<<",";
+            }
+            std::cout<<std::endl;
+        }
+    }
+    else
+    {
+        ROS_INFO("16 ultrasonic");
+        ultrasonic_real_num = 16;
+        int group_mode_forward_tmp[2][4] = 
+        {
+            {10,11,0xff,0xff},
+            {0,1,12,13},
+        };
+
+        int group_mode_backward_tmp[2][2] = 
+        {
+            {5,6},
+            {14,15},
+        };
+
+        int group_mode_turning_tmp[3][6] = 
+        {
+            {  10,  11,   5,   6,14,15},
+            {   0,   1,  12,  13,0xff,0xff},
+            {   2,   4,   3,   7,   8,   9}
+        };
+
+        memcpy(group_mode_forward,group_mode_forward_tmp, sizeof(group_mode_forward_tmp));
+        memcpy(group_mode_backward,group_mode_backward_tmp, sizeof(group_mode_backward_tmp));
+        memcpy(group_mode_turning,group_mode_turning_tmp, sizeof(group_mode_turning_tmp));
+
+        std::cout<<"forward group"<<endl;
+        for(int i = 0; i < sizeof(group_mode_forward_tmp)/sizeof(group_mode_forward_tmp[0]); i++)
+        {
+            for(int j = 0; j < sizeof(group_mode_forward_tmp[0])/sizeof(group_mode_forward_tmp[0][0]); j++)
+            {
+                std::cout<<group_mode_forward[i][j]<<",";
+            }
+            std::cout<<std::endl;
+        }
+
+        std::cout<<"backward group"<<endl;
+        for(int i = 0; i < sizeof(group_mode_backward_tmp)/sizeof(group_mode_backward_tmp[0]); i++)
+        {
+            for(int j = 0; j < sizeof(group_mode_backward_tmp[0])/sizeof(group_mode_backward_tmp[0][0]); j++)
+            {
+                std::cout<<group_mode_backward[i][j]<<",";
+            }
+            std::cout<<std::endl;
+        }
+
+        std::cout<<"turning group"<<endl;
+        for(int i = 0; i < sizeof(group_mode_turning_tmp)/sizeof(group_mode_turning_tmp[0]); i++)
+        {
+            for(int j = 0; j < sizeof(group_mode_turning_tmp[0])/sizeof(group_mode_turning_tmp[0][0]); j++)
+            {
+                std::cout<<group_mode_turning[i][j]<<",";
+            }
+            std::cout<<std::endl;
+        }
+    }
+    return 0;
+}
+
+
 void Ultrasonic::pub_json_msg( const nlohmann::json j_msg)
 {
     std_msgs::String pub_json_msg;
@@ -410,8 +539,13 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 #endif
 
 
-#if 0
-                printf("ultrasonic: ");
+#if 0   //sensors data log
+                //printf("ultrasonic: ");
+                for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
+                {
+                    printf("%4d ",i+1);
+                }
+                printf("\n");
                 for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                 {
                     printf("%4d ",(uint16_t)(this->distance[i]*100));
@@ -419,11 +553,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 
 extern uint16_t laser_test_data[13];
 
-                printf("  laser:");
-                for(uint8_t i = 0; i <13; i++)
-                {
-                    printf("%3d ",(uint8_t)(laser_test_data[i]));
-                }
+                printf("\n");
                 printf("\n");
 #endif
 
@@ -556,7 +686,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
                 usleep(2000);
                 this->ultrasonic_pub_to_navigation.publish(this->ultrasonic_data);
             }
-            else if( (en_sonar & (0x00000001<<i)) &&/* (current_work_mode_ul & (0x000000001 << i))*/ )
+            else if( (en_sonar & (0x00000001<<i)) /*&& (current_work_mode_ul & (0x000000001 << i))*/ )
             {
                 close_all_flag = 0;
 

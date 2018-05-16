@@ -98,10 +98,11 @@ int main(int argc, char **argv)
         ROS_WARN("ultrasonic: default min range 0.03");
     }
 
+
     uint32_t rate = 1000;
     ros::Rate loop_rate(rate);
     uint32_t cnt = 0;
-    bool get_version_init = 0;
+    bool get_mcu_version_init = 0;
     static uint8_t pre_mode = ULTRASONIC_MODE_NONE;
     ros::Time mode_test_start_time = ros::Time::now();
     ros::Duration mode_test_duration(random()%(MODE_TEST_DURATION_MAX - MODE_TEST_DURATION_MIN) + MODE_TEST_DURATION_MIN);//random 100~1000 seconds
@@ -110,7 +111,7 @@ int main(int argc, char **argv)
     sleep(1.5);
     while(ros::ok())
     {
-        if(get_version_init == 0)
+        if(get_mcu_version_init == 0)
         {
             static uint8_t cnt = 0;
             //for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
@@ -129,7 +130,7 @@ int main(int argc, char **argv)
             cnt++;
             if(cnt >= 3*(ULTRASONIC_NUM_MAX + LASER_NUM_MAX))
             {
-                get_version_init = 1; 
+                get_mcu_version_init = 1; 
             }
         }
 

@@ -22,7 +22,7 @@ using json = nlohmann::json;
 #define CAN_SOURCE_ID_MEASUREMENT_EN        0x81
 #define CAN_SOURCE_ID_SET_GROUP             0x83
 
-#define ULTRASONIC_NUM_MAX                  14 
+#define ULTRASONIC_NUM_MAX                  16 
 #define FILTER_BUF_SIZE                     2 
 
 #define GROUP_PERIOD                        100//ms
@@ -93,6 +93,7 @@ class Ultrasonic
         void update_measure_en(uint32_t ul_en);
         void updata_work_mode(void);
         void updata_measure_range(void);
+        int get_machine_version(void);
         //void ack_work_mode(
 
         uint8_t is_mode_init = 0;
@@ -113,7 +114,7 @@ class Ultrasonic
 
 
         uint32_t forward_separate[2];
-        uint8_t group_mode_forward[2][4] = 
+        int group_mode_forward[2][4] = 
                 {
                     {10,11,0xff,0xff},
                     {0,1,12,13},
@@ -121,16 +122,16 @@ class Ultrasonic
                 };
 
         uint32_t backward_separate[2];
-        uint8_t group_mode_backward[2][2] = 
+        int group_mode_backward[2][2] = 
                 {
                     {5,6},
-                    {0xff,0xff},
+                    {14,15},
                 };
 
         uint32_t turning_separate[3];
-        uint8_t group_mode_turning[3][6] = 
+        int group_mode_turning[3][6] = 
                 {
-                    {  10,  11,   5,   6,0xff,0xff},
+                    {  10,  11,   5,   6,  14,  15},
                     {   0,   1,  12,  13,0xff,0xff},
                     {   2,   4,   3,   7,   8,   9}
                     //{   2,   4,   3,0xff,0xff,0xff},
@@ -151,6 +152,8 @@ class Ultrasonic
         ros::Publisher ultrasonic_pub_to_navigation;
         ros::Publisher ultrasonic_pub_to_navigation_all;
         ros::Publisher work_mode_ack_pub;
+
+        std::string machine_version;
 
         int param_get_test = 0;
 
@@ -210,14 +213,15 @@ class Ultrasonic
         ros::Publisher  version_ack_pub;
 
 
-        std::string ultrasonic_version_param[ULTRASONIC_NUM_MAX] = {"mcu_ultrasonic_0_version","mcu_ultrasonic_1_version","mcu_ultrasonic_2_version","mcu_ultrasonic_3_version","mcu_ultrasonic_4_version","mcu_ultrasonic_5_version","mcu_ultrasonic_6_version","mcu_ultrasonic_7_version", "mcu_ultrasonic_8_version","mcu_ultrasonic_9_version","mcu_ultrasonic_10_version","mcu_ultrasonic_11_version","mcu_ultrasonic_12_version","mcu_ultrasonic_13_version"};
+        std::string ultrasonic_version_param[ULTRASONIC_NUM_MAX] = {"mcu_ultrasonic_0_version","mcu_ultrasonic_1_version","mcu_ultrasonic_2_version","mcu_ultrasonic_3_version","mcu_ultrasonic_4_version","mcu_ultrasonic_5_version","mcu_ultrasonic_6_version","mcu_ultrasonic_7_version", "mcu_ultrasonic_8_version","mcu_ultrasonic_9_version","mcu_ultrasonic_10_version","mcu_ultrasonic_11_version","mcu_ultrasonic_12_version","mcu_ultrasonic_13_version","mcu_ultrasonic_14_version","mcu_ultrasonic_15_version"};
 
-        std::string ultrasonic_num[ULTRASONIC_NUM_MAX] = {"ultrasonic_0","ultrasonic_1","ultrasonic_2","ultrasonic_3","ultrasonic_4","ultrasonic_5","ultrasonic_6","ultrasonic_7", "ultrasonic_8","ultrasonic_9","ultrasonic_10","ultrasonic_11","ultrasonic_12","ultrasonic_13"};
-        std::string ultrasonic_frames[ULTRASONIC_NUM_MAX] = {"sonar_frame_0","sonar_frame_1","sonar_frame_2","sonar_frame_3","sonar_frame_4","sonar_frame_5","sonar_frame_6","sonar_frame_7", "sonar_frame_8","sonar_frame_9","sonar_frame_10","sonar_frame_11","sonar_frame_12","sonar_frame_13"};
+        std::string ultrasonic_num[ULTRASONIC_NUM_MAX] = {"ultrasonic_0","ultrasonic_1","ultrasonic_2","ultrasonic_3","ultrasonic_4","ultrasonic_5","ultrasonic_6","ultrasonic_7", "ultrasonic_8","ultrasonic_9","ultrasonic_10","ultrasonic_11","ultrasonic_12","ultrasonic_13","ultrasonic_14","ultrasonic_15"};
+        std::string ultrasonic_frames[ULTRASONIC_NUM_MAX] = {"sonar_frame_0","sonar_frame_1","sonar_frame_2","sonar_frame_3","sonar_frame_4","sonar_frame_5","sonar_frame_6","sonar_frame_7", "sonar_frame_8","sonar_frame_9","sonar_frame_10","sonar_frame_11","sonar_frame_12","sonar_frame_13","sonar_frame_14","sonar_frame_15"};
 
         std::string ultrasonic_frame_all = "sonar_frame_all";
 
         uint8_t ultrasonic_real_num = ULTRASONIC_NUM_MAX;
+
         uint32_t measure_en_ack = 0xffffffff;
         sonar_msgs::sonar_msgs ultrasonic_msgs;
 
