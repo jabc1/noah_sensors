@@ -356,7 +356,7 @@ int main(int argc, char **argv)
                     ultrasonic->test_data.data.clear();
                     for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                     {
-                        ultrasonic->test_data.data.push_back((uint8_t)(ultrasonic->distance[i]*100));
+                        ultrasonic->test_data.data.push_back((uint8_t)(ultrasonic->distance_test[i]*100));
                     }
                     for(uint8_t i = 0; i < LASER_NUM_MAX; i++)
                     {
