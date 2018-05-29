@@ -1,5 +1,5 @@
 
-noah_sensors_version: 0.0.4
+noah_sensors_version: 0.0.5
 
 /noah_sensors/ultrasonic/max_range: 2.0
 /noah_sensors/ultrasonic/min_range: 0.03 

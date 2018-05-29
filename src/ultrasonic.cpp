@@ -533,12 +533,12 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                 if( (abs(this->distance[13]) >= 0.000001)  &&  (abs(this->distance[12]) >= 0.000001) )
                 {
                     this->distance[12] = min(this->distance[12],this->distance[13]);
-                    this->distance[13] = this->distance[12];
+                    //this->distance[13] = this->distance[12];
                 }
                 else
                 {
                     this->distance[12] = max(this->distance[12],this->distance[13]);
-                    this->distance[13] = this->distance[12];
+                    //this->distance[13] = this->distance[12];
                 }
             }
 #endif
@@ -697,8 +697,8 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     n.getParam("ultrasonic_test",param_get_test);
     //ROS_ERROR("param_get_test is %d",param_get_test);
 #if 1
-    this->ultrasonic_msgs.sonars.resize(NAVIGATION_ULTRASONIC_NUM - 1);
-    for(int i=0;i<NAVIGATION_ULTRASONIC_NUM - 1;i++)
+    this->ultrasonic_msgs.sonars.resize(NAVIGATION_ULTRASONIC_NUM );
+    for(int i=0;i<NAVIGATION_ULTRASONIC_NUM ;i++)
     {
         this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
         this->ultrasonic_data.range = this->distance[i];
@@ -708,7 +708,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 
     if(close_all_flag == 0)
     {
-        for(int i=0;i<NAVIGATION_ULTRASONIC_NUM - 1;i++)
+        for(int i=0;i<NAVIGATION_ULTRASONIC_NUM ;i++)
         {
             if(en_sonar == 0)
             {
