@@ -43,6 +43,7 @@ void Ultrasonic::update_status(void)
         {
             this->err_status[i] = ERR_COMMUNICATE_TIME_OUT;
             this->distance[i] = DISTANCE_ERR_TIME_OUT;
+            this->distance_hw_test[i] = DISTANCE_ERR_TIME_OUT;
         }
     }
 }
@@ -473,6 +474,22 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             static uint32_t cnt = 0;
             this->start_measure_time[ul_id] = ros::Time::now();
 
+            if((ul_id == 5) || (ul_id == 14))
+            {
+                this->start_measure_time[5] = ros::Time::now();
+                this->start_measure_time[14] = ros::Time::now();
+            }
+            if((ul_id == 6) || (ul_id == 15))
+            {
+                this->start_measure_time[6] = ros::Time::now();
+                this->start_measure_time[15] = ros::Time::now();
+            }
+            if((ul_id == 12) || (ul_id == 13))
+            {
+                this->start_measure_time[12] = ros::Time::now();
+                this->start_measure_time[13] = ros::Time::now();
+            }
+
             distance_tmp = msg->Data[0];
             distance_tmp += msg->Data[1]<<8;
 
@@ -492,7 +509,8 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                 this->distance[ul_id] = this->min_range;
             }
 
-            this->distance_test[ul_id] = this->distance[ul_id];
+            this->distance_raw[ul_id] = this->distance[ul_id];
+            this->distance_hw_test[ul_id] = this->distance[ul_id];
 #if 0
             if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
@@ -530,14 +548,14 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 #if 1
             if((ul_id == 12) || (ul_id == 13))
             {
-                if( (abs(this->distance[13]) >= 0.000001)  &&  (abs(this->distance[12]) >= 0.000001) )
+                if( (abs(this->distance_raw[13]) >= 0.000001)  &&  (abs(this->distance_raw[12]) >= 0.000001) )
                 {
-                    this->distance[12] = min(this->distance[12],this->distance[13]);
+                    this->distance[12] = min(this->distance_raw[12],this->distance_raw[13]);
                     //this->distance[13] = this->distance[12];
                 }
                 else
                 {
-                    this->distance[12] = max(this->distance[12],this->distance[13]);
+                    this->distance[12] = max(this->distance_raw[12],this->distance_raw[13]);
                     //this->distance[13] = this->distance[12];
                 }
             }
@@ -547,15 +565,15 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 #if 1   //merge  6 and 15 to get the minimum
                 if((ul_id == 5) || (ul_id == 14))
                 {
-                    if( (abs(this->distance[14]) >= 0.000001)  &&  (abs(this->distance[5]) >= 0.000001) )
+                    if( (abs(this->distance_raw[14]) >= 0.000001)  &&  (abs(this->distance_raw[5]) >= 0.000001) )
                     {
-                        this->distance[5] = min(this->distance[5],this->distance[14]);
-                        this->distance[14] = this->distance[5];
+                        this->distance[5] = min(this->distance_raw[5],this->distance_raw[14]);
+                        //this->distance[14] = this->distance[5];
                     }
                     else
                     {
-                        this->distance[5] = max(this->distance[5],this->distance[14]);
-                        this->distance[14] = this->distance[5];
+                        this->distance[5] = max(this->distance_raw[5],this->distance_raw[14]);
+                        //this->distance[14] = this->distance[5];
                     }
                 }
 #endif
@@ -563,15 +581,15 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
 #if 1   //merge 7 and 16 to get the minimum
                 if((ul_id == 6) || (ul_id == 15))
                 {
-                    if( (abs(this->distance[15]) >= 0.000001)  &&  (abs(this->distance[6]) >= 0.000001) )
+                    if( (abs(this->distance_raw[15]) >= 0.000001)  &&  (abs(this->distance_raw[6]) >= 0.000001) )
                     {
-                        this->distance[6] = min(this->distance[6],this->distance[15]);
-                        this->distance[15] = this->distance[6];
+                        this->distance[6] = min(this->distance_raw[6],this->distance_raw[15]);
+                        //this->distance[15] = this->distance[6];
                     }
                     else
                     {
-                        this->distance[6] = max(this->distance[6],this->distance[15]);
-                        this->distance[15] = this->distance[6];
+                        this->distance[6] = max(this->distance_raw[6],this->distance_raw[15]);
+                        //this->distance[15] = this->distance[6];
                     }
                 }
 #endif

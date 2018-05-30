@@ -142,7 +142,8 @@ class Ultrasonic
         double max_range = DISTANCE_MAX;
         double min_range = DISTANCE_MIN;
         double distance[ULTRASONIC_NUM_MAX] = {0};
-        double distance_test[ULTRASONIC_NUM_MAX] = {0};
+        double distance_raw[ULTRASONIC_NUM_MAX] = {0};
+        double distance_hw_test[ULTRASONIC_NUM_MAX] = {0};//for hardware test
         double distance_buf[ULTRASONIC_NUM_MAX][FILTER_BUF_SIZE] = {{0}};
         uint8_t distance_buf_proc[ULTRASONIC_NUM_MAX][FILTER_BUF_SIZE] = {{0}};
 
