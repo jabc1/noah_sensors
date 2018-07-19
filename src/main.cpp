@@ -94,7 +94,7 @@ int main(int argc, char **argv)
     }
     else
     {
-        ultrasonic->max_range = 0.03;
+        ultrasonic->min_range = 0.03;
         ROS_WARN("ultrasonic: default min range 0.03");
     }
 
