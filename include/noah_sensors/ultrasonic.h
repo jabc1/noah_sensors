@@ -94,7 +94,9 @@ class Ultrasonic
         void updata_work_mode(void);
         void updata_measure_range(void);
         int get_machine_version(void);
-        //void ack_work_mode(
+
+        void merge_all_min_distance_data(void);
+
 
         uint8_t is_mode_init = 0;
         bool is_log_on;
@@ -230,6 +232,8 @@ class Ultrasonic
         bool is_ultrasonic_can_id(CAN_ID_UNION id);
         bool is_ultrasonic_work_mode(int mode);
         uint8_t parse_ultrasonic_id(CAN_ID_UNION id);
+        double merge_min_distance_data(double data1, double data2);
+
 };
 
 

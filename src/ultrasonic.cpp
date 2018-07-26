@@ -423,6 +423,33 @@ uint8_t Ultrasonic::parse_ultrasonic_id(CAN_ID_UNION id)
 }
 
 
+double Ultrasonic::merge_min_distance_data(double data1, double data2)
+{
+    double min_data = 0;
+    if( (abs(data1) >= 0.000001)  &&  (abs(data2) >= 0.000001) )
+    {
+        min_data = max(data1, data2);
+    }
+    else
+    {
+        min_data = min(data1, data2);
+    }
+    return min_data;
+}
+void Ultrasonic::merge_all_min_distance_data(void)
+{
+    if(16 == ultrasonic_real_num )
+    {
+        this->distance[5] = this->merge_min_distance_data(this->distance_raw[5], this->distance_raw[14]);
+        this->distance[6] = this->merge_min_distance_data(this->distance_raw[6], this->distance_raw[15]);
+        this->distance[12] = this->merge_min_distance_data(this->distance_raw[12], this->distance_raw[13]);
+    }
+    if(14 == ultrasonic_real_num )
+    {
+        this->distance[12] = this->merge_min_distance_data(this->distance_raw[5], this->distance_raw[13]);
+    }
+}
+
 void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg)
 {
     mrobot_driver_msgs::vci_can can_msg;
@@ -474,32 +501,15 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             static uint32_t cnt = 0;
             this->start_measure_time[ul_id] = ros::Time::now();
 
-            if((ul_id == 5) || (ul_id == 14))
-            {
-                this->start_measure_time[5] = ros::Time::now();
-                this->start_measure_time[14] = ros::Time::now();
-            }
-            if((ul_id == 6) || (ul_id == 15))
-            {
-                this->start_measure_time[6] = ros::Time::now();
-                this->start_measure_time[15] = ros::Time::now();
-            }
-            if((ul_id == 12) || (ul_id == 13))
-            {
-                this->start_measure_time[12] = ros::Time::now();
-                this->start_measure_time[13] = ros::Time::now();
-            }
-
             distance_tmp = msg->Data[0];
             distance_tmp += msg->Data[1]<<8;
-
 
             if((distance_tmp < 3) && (distance_tmp > 0))
             {
                 distance_tmp = 3;
             }
 
-            this->distance[ul_id] = double(distance_tmp)/100;
+            this->distance_raw[ul_id] = double(distance_tmp)/100;
             if((this->distance[ul_id] >= this->max_range - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
                 this->distance[ul_id] = this->max_range;
@@ -509,116 +519,16 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                 this->distance[ul_id] = this->min_range;
             }
 
-            this->distance_raw[ul_id] = this->distance[ul_id];
-            this->distance_hw_test[ul_id] = this->distance[ul_id];
-#if 0
-            if((this->distance[ul_id] >= DISTANCE_MAX - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
-            {
-                this->distance[ul_id] = DISTANCE_MAX;
-                //this->distance_buf[ul_id][cnt] = DISTANCE_MAX;
-                this->distance_buf_proc[ul_id][cnt] = 0;
-            }
-            else
-            {
-                uint8_t filter_flag = 1;
-                this->distance_buf_proc[ul_id][cnt] = 1;
-                for(uint8_t j = 0; j < FILTER_BUF_SIZE; j++) 
-                {
-                    filter_flag *= this->distance_buf_proc[ul_id][cnt];
-                }
-                if(filter_flag == 0)
-                {
-                    this->distance[ul_id] = DISTANCE_MAX;
-                }
-            }
-#endif
+            this->distance[ul_id] = this->distance_raw[ul_id];
+            this->distance_hw_test[ul_id] = this->distance_raw[ul_id];
             measure_en_ack |= 1<<ul_id; //we can receive measurement data, so this ultrasonic is enable !
-
-            if(cnt < FILTER_BUF_SIZE - 1)
-            {
-                cnt++;
-            }
-            else
-            {
-                cnt = 0;
-            }
-
-
-
-#if 1
-            if((ul_id == 12) || (ul_id == 13))
-            {
-                if( (abs(this->distance_raw[13]) >= 0.000001)  &&  (abs(this->distance_raw[12]) >= 0.000001) )
-                {
-                    this->distance[12] = min(this->distance_raw[12],this->distance_raw[13]);
-                    //this->distance[13] = this->distance[12];
-                }
-                else
-                {
-                    this->distance[12] = max(this->distance_raw[12],this->distance_raw[13]);
-                    //this->distance[13] = this->distance[12];
-                }
-            }
-#endif
-            if(ultrasonic_real_num == 16)
-            {
-#if 1   //merge  6 and 15 to get the minimum
-                if((ul_id == 5) || (ul_id == 14))
-                {
-                    if( (abs(this->distance_raw[14]) >= 0.000001)  &&  (abs(this->distance_raw[5]) >= 0.000001) )
-                    {
-                        this->distance[5] = min(this->distance_raw[5],this->distance_raw[14]);
-                        //this->distance[14] = this->distance[5];
-                    }
-                    else
-                    {
-                        this->distance[5] = max(this->distance_raw[5],this->distance_raw[14]);
-                        //this->distance[14] = this->distance[5];
-                    }
-                }
-#endif
-
-#if 1   //merge 7 and 16 to get the minimum
-                if((ul_id == 6) || (ul_id == 15))
-                {
-                    if( (abs(this->distance_raw[15]) >= 0.000001)  &&  (abs(this->distance_raw[6]) >= 0.000001) )
-                    {
-                        this->distance[6] = min(this->distance_raw[6],this->distance_raw[15]);
-                        //this->distance[15] = this->distance[6];
-                    }
-                    else
-                    {
-                        this->distance[6] = max(this->distance_raw[6],this->distance_raw[15]);
-                        //this->distance[15] = this->distance[6];
-                    }
-                }
-#endif
-            }
-#if 0   //sensors data log
-                //printf("ultrasonic: ");
-                for(uint8_t i = 0; i < ultrasonic_real_num; i++)
-                {
-                    printf("%4d ",i+1);
-                }
-                printf("\n");
-                for(uint8_t i = 0; i < ultrasonic_real_num; i++)
-                {
-                    printf("%4d ",(uint16_t)(this->distance[i]*100));
-                }
-
-extern uint16_t laser_test_data[13];
-
-                printf("\n");
-                printf("\n");
-#endif
-
         }
     }
     
     if(id.CanID_Struct.SourceID == CAN_SOURCE_ID_MEASUREMENT_EN)
     {
         if(id.CanID_Struct.ACK == 1)
-        {   
+        {
             if(msg->Data[0] == 0)
             {
                 measure_en_ack &= ~(1<<ul_id);
@@ -637,10 +547,9 @@ extern uint16_t laser_test_data[13];
     if(id.CanID_Struct.SourceID == CAN_SOURCE_ID_SET_GROUP)
     {
         if(id.CanID_Struct.ACK == 1)
-        {   
+        {
             if(msg->Data[0] > 0)
             {
-                //group[ul_id] = msg->Data[0];
                 group_id_t group_id;
                 group_id.id = ul_id;
                 group_id.group = msg->Data[0];
@@ -649,7 +558,6 @@ extern uint16_t laser_test_data[13];
                     for(vector<group_id_t>::iterator it = group_id_vec.begin(); it != group_id_vec.end(); it++)
                     {
                         if( ( (*it).group == group_id.group) && ( (*it).id == group_id.id))
-                        //if( ( group_id_vec[i].group == group_id.group) && ( (*it).id == group_id.id))
                         {
                             group_id_vec.erase(it); 
                             break;
@@ -711,11 +619,11 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     this->ultrasonic_data.min_range = this->min_range;
     this->ultrasonic_data.max_range = this->max_range;
 
-
     n.getParam("ultrasonic_test",param_get_test);
-    //ROS_ERROR("param_get_test is %d",param_get_test);
 #if 1
+
     this->ultrasonic_msgs.sonars.resize(NAVIGATION_ULTRASONIC_NUM );
+    this->merge_all_min_distance_data();
     for(int i=0;i<NAVIGATION_ULTRASONIC_NUM ;i++)
     {
         this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
