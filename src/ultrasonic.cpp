@@ -43,6 +43,7 @@ void Ultrasonic::update_status(void)
         {
             this->err_status[i] = ERR_COMMUNICATE_TIME_OUT;
             this->distance[i] = DISTANCE_ERR_TIME_OUT;
+            this->distance_raw[i] = DISTANCE_ERR_TIME_OUT;
             this->distance_hw_test[i] = DISTANCE_ERR_TIME_OUT;
         }
     }
@@ -428,11 +429,22 @@ double Ultrasonic::merge_min_distance_data(double data1, double data2)
     double min_data = 0;
     if( (abs(data1) >= 0.000001)  &&  (abs(data2) >= 0.000001) )
     {
-        min_data = max(data1, data2);
+        min_data = min(data1, data2);
     }
     else
     {
-        min_data = min(data1, data2);
+	if(abs(data1 - DISTANCE_ERR_TIME_OUT) <= 0.00001)
+	{
+		min_data = data2;
+	}
+	else if(abs(data2 - DISTANCE_ERR_TIME_OUT) <= 0.00001)
+	{
+		min_data = data1;
+	}
+	else 
+	{
+		min_data = max(data1, data2);
+	}
     }
     return min_data;
 }
@@ -510,13 +522,13 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             }
 
             this->distance_raw[ul_id] = double(distance_tmp)/100;
-            if((this->distance[ul_id] >= this->max_range - 0.00001) || (abs(this->distance[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
+            if((this->distance_raw[ul_id] >= this->max_range - 0.00001) || (abs(this->distance_raw[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
-                this->distance[ul_id] = this->max_range;
+                this->distance_raw[ul_id] = this->max_range;
             }
-            if(this->distance[ul_id] <= this->min_range + 0.00001)
+            if(this->distance_raw[ul_id] <= this->min_range + 0.00001)
             {
-                this->distance[ul_id] = this->min_range;
+                this->distance_raw[ul_id] = this->min_range;
             }
 
             this->distance[ul_id] = this->distance_raw[ul_id];
