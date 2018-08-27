@@ -1,26 +1,26 @@
-/* 
- *  ultrasonic.cpp 
+/*
+ *  ultrasonic.cpp
  *  Communicate with ultrasonics.
- *  Author: Kaka Xie 
+ *  Author: Kaka Xie
  *  Date:2017/11/28
  */
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include "std_msgs/UInt8MultiArray.h" 
+#include "std_msgs/UInt8MultiArray.h"
 #include "pthread.h"
 
 #include <algorithm>
 
 #include <math.h>
-#include <stdio.h>     
-#include <stdlib.h>     
-#include <unistd.h>     
-#include <sys/types.h>  
-#include <sys/stat.h>   
-#include <fcntl.h>      
-#include <termios.h>   
-#include <errno.h>     
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <errno.h>
 #include <string.h>
 #include <time.h>
 #include <signal.h>
@@ -49,7 +49,7 @@ void Ultrasonic::update_status(void)
     }
 }
 
-void Ultrasonic::get_version(uint8_t ul_id)     
+void Ultrasonic::get_version(uint8_t ul_id)
 {
     if(ul_id > 15)
     {
@@ -73,9 +73,9 @@ void Ultrasonic::get_version(uint8_t ul_id)
     this->pub_to_can_node.publish(can_msg);
 }
 
-int Ultrasonic::start_measurement(uint8_t ul_id)     
+int Ultrasonic::start_measurement(uint8_t ul_id)
 {
-    int error = 0; 
+    int error = 0;
     if(ul_id > 15)
     {
         return -1;
@@ -99,7 +99,7 @@ int Ultrasonic::start_measurement(uint8_t ul_id)
     return error;
 }
 
-void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)     
+void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)
 {
     if(ul_id >= ultrasonic_real_num)
     {
@@ -123,10 +123,10 @@ void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)
     this->pub_to_can_node.publish(can_msg);
 }
 #define BROADCAST_CAN_SRC_ID    0x60
-int Ultrasonic::broadcast_measurement(uint32_t group)     
+int Ultrasonic::broadcast_measurement(uint32_t group)
 {
     //ROS_ERROR("%s",__func__);
-    int error = 0; 
+    int error = 0;
     mrobot_driver_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
@@ -151,9 +151,9 @@ int Ultrasonic::broadcast_measurement(uint32_t group)
     return error;
 }
 
-int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)     
+int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
 {
-    int error = 0; 
+    int error = 0;
     if(ul_id >= ultrasonic_real_num)
     {
         ROS_ERROR("ul_id is not right, set group failed ! !");
@@ -182,13 +182,13 @@ int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
 
 void Ultrasonic::update_measure_en(uint32_t ul_en)
 {
-    if(ul_en<<(32 - ultrasonic_real_num) == measure_en_ack<<(32 - ultrasonic_real_num)) 
+    if(ul_en<<(32 - ultrasonic_real_num) == measure_en_ack<<(32 - ultrasonic_real_num))
         return;
     if(ros::Time::now() - sensor_en_start_time < ros::Duration(4))
     {
         for(uint8_t i = 0; i < ultrasonic_real_num; i++)
         {
-            if( (ul_en^measure_en_ack) &(1<<i) ) 
+            if( (ul_en^measure_en_ack) &(1<<i) )
             {
                 this->ultrasonic_en(i,(ul_en>>i) &0x01);
                 //ROS_ERROR("set %d to %d",i, (ul_en>>i) &0x01);
@@ -213,10 +213,10 @@ void Ultrasonic::updata_work_mode(void)
     n.getParam("/noah_sensors/ultrasonic_work_mode",get_work_mode);
     if(is_ultrasonic_work_mode(get_work_mode) == true)
     {
-        if(this->work_mode != get_work_mode)    
+        if(this->work_mode != get_work_mode)
         {
             ROS_WARN("change work mode from %d to %d",this->work_mode,get_work_mode);
-            this->work_mode = get_work_mode; 
+            this->work_mode = get_work_mode;
             this->is_mode_init = 0;
         }
     }
@@ -228,7 +228,7 @@ void Ultrasonic::updata_measure_range(void)
     static double min_range_tmp = 0;
     n.getParam("/noah_sensors/ultrasonic/max_range",this->max_range);
     n.getParam("/noah_sensors/ultrasonic/min_range",this->min_range);
-    if(max_range > min_range + 0.0001) 
+    if(max_range > min_range + 0.0001)
     {
         if((abs(max_range_tmp - max_range) > 0.0001) || (abs(min_range_tmp - min_range) > 0.0001))
         {
@@ -312,19 +312,19 @@ int Ultrasonic::get_machine_version(void)
     {
         ROS_INFO("16 ultrasonic");
         ultrasonic_real_num = 16;
-        int group_mode_forward_tmp[2][4] = 
+        int group_mode_forward_tmp[2][4] =
         {
             {10,11,0xff,0xff},
             {0,1,12,13},
         };
 
-        int group_mode_backward_tmp[2][2] = 
+        int group_mode_backward_tmp[2][2] =
         {
             {5,6},
             {14,15},
         };
 
-        int group_mode_turning_tmp[3][6] = 
+        int group_mode_turning_tmp[3][6] =
         {
             {  10,  11,   5,   6,14,15},
             {   0,   1,  12,  13,0xff,0xff},
@@ -388,7 +388,7 @@ void Ultrasonic::get_mcu_version_callback(const std_msgs::String data)
 
     for(uint8_t i = 0; i < ultrasonic_real_num; i++)
     {
-        j = 
+        j =
         {
             {"version_ack","sensors"},
             {
@@ -433,18 +433,18 @@ double Ultrasonic::merge_min_distance_data(double data1, double data2)
     }
     else
     {
-	if(abs(data1 - DISTANCE_ERR_TIME_OUT) <= 0.00001)
-	{
-		min_data = data2;
-	}
-	else if(abs(data2 - DISTANCE_ERR_TIME_OUT) <= 0.00001)
-	{
-		min_data = data1;
-	}
-	else 
-	{
-		min_data = max(data1, data2);
-	}
+        if(abs(data1 - DISTANCE_ERR_TIME_OUT) <= 0.00001)
+        {
+            min_data = data2;
+        }
+        else if(abs(data2 - DISTANCE_ERR_TIME_OUT) <= 0.00001)
+        {
+            min_data = data1;
+        }
+        else
+        {
+            min_data = max(data1, data2);
+        }
     }
     return min_data;
 }
@@ -458,7 +458,7 @@ void Ultrasonic::merge_all_min_distance_data(void)
     }
     if(14 == ultrasonic_real_num )
     {
-        this->distance[12] = this->merge_min_distance_data(this->distance_raw[5], this->distance_raw[13]);
+        this->distance[12] = this->merge_min_distance_data(this->distance_raw[12], this->distance_raw[13]);
     }
 }
 
@@ -471,7 +471,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
     //ROS_INFO("%s",__func__);
     long_msg = this->long_frame.frame_construct(c_msg);
     mrobot_driver_msgs::vci_can* msg = &long_msg;
-    if( msg->ID == 0 ) 
+    if( msg->ID == 0 )
     {
         return;
     }
@@ -495,14 +495,14 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
     if((ul_id = this->parse_ultrasonic_id(id)) == NOT_ULTRASONIC_ID)
     {
         ROS_ERROR("ultrasonic CAN id not right");
-        return ; 
+        return ;
     }
     if(ul_id >= ultrasonic_real_num)
     {
         ROS_ERROR("wtf ! ! !");
         return;
     }
-    
+
     this->online[ul_id] = 1;
 
     if(id.CanID_Struct.SourceID == CAN_SOURCE_ID_START_MEASUREMENT)
@@ -536,7 +536,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
             measure_en_ack |= 1<<ul_id; //we can receive measurement data, so this ultrasonic is enable !
         }
     }
-    
+
     if(id.CanID_Struct.SourceID == CAN_SOURCE_ID_MEASUREMENT_EN)
     {
         if(id.CanID_Struct.ACK == 1)
@@ -571,7 +571,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
                     {
                         if( ( (*it).group == group_id.group) && ( (*it).id == group_id.id))
                         {
-                            group_id_vec.erase(it); 
+                            group_id_vec.erase(it);
                             break;
                         }
                     }
@@ -586,7 +586,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::C
     {
         uint8_t len;
         if(id.CanID_Struct.ACK == 1)
-        {   
+        {
             len = msg->Data[0];
             version[ul_id].resize(len);
             version[ul_id].clear();
@@ -623,7 +623,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     uint32_t en_sonar = sonar_en;
     static bool close_all_flag = 0;
     this->ultrasonic_msgs.header.stamp = ros::Time::now();
-    this->ultrasonic_msgs.header.frame_id = ultrasonic_frame_all;   
+    this->ultrasonic_msgs.header.frame_id = ultrasonic_frame_all;
 
     this->ultrasonic_data.header.stamp = ros::Time::now();
     this->ultrasonic_data.radiation_type = ULTRASOUND;
