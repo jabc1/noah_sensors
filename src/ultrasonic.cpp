@@ -616,11 +616,31 @@ void Ultrasonic::work_mode_callback(const std_msgs::UInt8MultiArray set_mode)
     }
 }
 
+uint32_t Ultrasonic::get_pub_to_navi_ultrasonics(uint32_t sonar_en)
+{
+    uint32_t pub_to_navi_ultrasonics = sonar_en;
+    if( (sonar_en & (1<<5)) || ( (sonar_en & (1<<14)) && ultrasonic_real_num == 16) )
+    {
+        pub_to_navi_ultrasonics |= 1<<5;
+    }
+
+    if( (sonar_en & (1<<6)) || ( (sonar_en & (1<<15)) && ultrasonic_real_num == 16) )
+    {
+        pub_to_navi_ultrasonics |= 1<<6;
+    }
+
+    if( (sonar_en & (1<<12)) || (sonar_en & (1<<13)) )
+    {
+        pub_to_navi_ultrasonics |= 1<<12;
+    }
+
+    return pub_to_navi_ultrasonics;
+}
 
 void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 {
 #define NAVIGATION_ULTRASONIC_NUM   13
-    uint32_t en_sonar = sonar_en;
+    uint32_t en_sonar = this->get_pub_to_navi_ultrasonics(sonar_en);
     static bool close_all_flag = 0;
     this->ultrasonic_msgs.header.stamp = ros::Time::now();
     this->ultrasonic_msgs.header.frame_id = ultrasonic_frame_all;
@@ -631,12 +651,10 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     this->ultrasonic_data.min_range = this->min_range;
     this->ultrasonic_data.max_range = this->max_range;
 
-    n.getParam("ultrasonic_test",param_get_test);
-#if 1
 
     this->ultrasonic_msgs.sonars.resize(NAVIGATION_ULTRASONIC_NUM );
     this->merge_all_min_distance_data();
-    for(int i=0;i<NAVIGATION_ULTRASONIC_NUM ;i++)
+    for(int i = 0; i < NAVIGATION_ULTRASONIC_NUM; i++)
     {
         this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
         this->ultrasonic_data.range = this->distance[i];
@@ -652,11 +670,6 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
             {
                 close_all_flag = 1;
 
-                if(i >= 3)
-                {
-                    this->ultrasonic_data.min_range = this->min_range;
-                    this->ultrasonic_data.max_range = this->max_range;
-                }
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
                 this->ultrasonic_data.range = 5.0;
                 usleep(2000);
@@ -666,11 +679,6 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
             {
                 close_all_flag = 0;
 
-                if(i >= 3)
-                {
-                    this->ultrasonic_data.min_range = this->min_range;
-                    this->ultrasonic_data.max_range = this->max_range;
-                }
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
                 this->ultrasonic_data.range = this->distance[i];
                 usleep(2000);
@@ -687,8 +695,6 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     {
         close_all_flag = 0;
     }
-
-#endif
 
 }
 

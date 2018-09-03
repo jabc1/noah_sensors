@@ -233,6 +233,7 @@ class Ultrasonic
         bool is_ultrasonic_work_mode(int mode);
         uint8_t parse_ultrasonic_id(CAN_ID_UNION id);
         double merge_min_distance_data(double data1, double data2);
+        uint32_t get_pub_to_navi_ultrasonics(uint32_t sonar_en);
 
 };
 
