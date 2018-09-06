@@ -6,18 +6,11 @@ find_package(catkin REQUIRED COMPONENTS
     roscpp
     message_generation
     mrobot_driver_msgs
-    #range_sensor_layer
-    sonar_msgs
     roscan
 )
 
 catkin_package(
   CATKIN_DEPENDS roscpp std_msgs message_runtime
-)
-
-add_message_files(
-  FILES
-  sonar_msgs.msg
 )
 
 

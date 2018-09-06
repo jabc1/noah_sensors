@@ -55,7 +55,6 @@
   <run_depend>mrobot_driver_msgs</run_depend>
   <run_depend>roscan</run_depend>
   <!-- <run_depend>range_sensor_layer</run_depend> -->
-  <run_depend>sonar_msgs</run_depend>
 
 
   <!-- The export tag contains other, unspecified, tags -->
