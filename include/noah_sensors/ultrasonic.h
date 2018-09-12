@@ -2,7 +2,7 @@
 #include "std_msgs/String.h"
 #include "json.hpp"
 #include <mrobot_driver_msgs/vci_can.h>
-#include <mrobot_driver_msgs/sonar_msgs.h>
+#include <mrobot_msgs/sonar_msgs.h>
 #include <roscan/can_long_frame.h>
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -68,7 +68,7 @@ class Ultrasonic
 
 
             ultrasonic_pub_to_navigation = n.advertise<sensor_msgs::Range>("sonar_msg",20);
-            ultrasonic_pub_to_navigation_all = n.advertise<mrobot_driver_msgs::sonar_msgs>("sonar_msg_all",20);
+            ultrasonic_pub_to_navigation_all = n.advertise<mrobot_msgs::sonar_msgs>("sonar_msg_all",20);
             work_mode_ack_pub = n.advertise<std_msgs::UInt8MultiArray>("ultrasonic_work_mode_ack",20);
             set_work_mode_start_time = ros::Time::now();
 
@@ -78,7 +78,7 @@ class Ultrasonic
             group_id_vec.clear();
             ultrasonic_msgs.sonars.resize(ULTRASONIC_NUM_MAX - 1);
         }
-        
+
         int start_measurement(uint8_t ul_id);
         void get_version(uint8_t ul_id);
         void ultrasonic_en(uint8_t ul_id, bool en);
@@ -226,7 +226,7 @@ class Ultrasonic
         uint8_t ultrasonic_real_num = ULTRASONIC_NUM_MAX;
 
         uint32_t measure_en_ack = 0xffffffff;
-        mrobot_driver_msgs::sonar_msgs ultrasonic_msgs;
+        mrobot_msgs::sonar_msgs ultrasonic_msgs;
 
         bool is_ultrasonic_can_id(CAN_ID_UNION id);
         bool is_ultrasonic_work_mode(int mode);
