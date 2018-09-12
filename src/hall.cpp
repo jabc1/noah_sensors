@@ -1,7 +1,7 @@
-/* 
- *  hall.cpp 
+/*
+ *  hall.cpp
  *  hall sensors proc.
- *  Author: Kaka Xie 
+ *  Author: Kaka Xie
  *  Date:2017/12/04
  */
 
@@ -50,9 +50,10 @@ void Hall::pub_hall_msg(const nlohmann::json j_msg)
     pub_json_msg.data = ss.str();
     this->hall_pub.publish(pub_json_msg);
 }
+
 void Hall::pub_hall_data(bool *hall)
 {
-    
+
     static bool state[2] = {false, false};
     json j;
 

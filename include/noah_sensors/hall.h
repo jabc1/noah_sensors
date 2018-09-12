@@ -12,7 +12,7 @@
 using json = nlohmann::json;
 
 #define HALL_NUM    2
-class Hall 
+class Hall
 {
     public:
 

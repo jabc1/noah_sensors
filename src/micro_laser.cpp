@@ -1,23 +1,23 @@
-/* 
- *  micro_laser.cpp 
+/*
+ *  micro_laser.cpp
  *  Communicate with micro lasers.
- *  Author: Kaka Xie 
+ *  Author: Kaka Xie
  *  Date:2017/11/30
  */
 
 #include "ros/ros.h"
 #include "std_msgs/String.h"
-#include "std_msgs/UInt8MultiArray.h" 
+#include "std_msgs/UInt8MultiArray.h"
 #include "pthread.h"
 #include <math.h>
-#include <stdio.h>     
-#include <stdlib.h>     
-#include <unistd.h>     
-#include <sys/types.h>  
-#include <sys/stat.h>   
-#include <fcntl.h>      
-#include <termios.h>   
-#include <errno.h>     
+#include <stdio.h>
+#include <stdlib.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <termios.h>
+#include <errno.h>
 #include <string.h>
 #include <time.h>
 #include <signal.h>
@@ -48,9 +48,9 @@ void Laser::update_status(void)
     }
 }
 
-int Laser::start_measurement(uint8_t laser_id)     
+int Laser::start_measurement(uint8_t laser_id)
 {
-    int error = 0; 
+    int error = 0;
     if(laser_id > 15)
     {
         return -1;
@@ -74,7 +74,7 @@ int Laser::start_measurement(uint8_t laser_id)
     return error;
 }
 
-void Laser::get_version(uint8_t ul_id)     
+void Laser::get_version(uint8_t ul_id)
 {
     if(ul_id >= LASER_NUM_MAX)
     {
@@ -150,7 +150,7 @@ void Laser::get_mcu_version_callback(const std_msgs::String data)
 
     for(uint8_t i = 0; i < LASER_NUM_MAX; i++)
     {
-        j = 
+        j =
         {
             {"version_ack","sensors"},
             {
@@ -174,7 +174,7 @@ void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstP
     //ROS_INFO("%s",__func__);
     long_msg = this->long_frame.frame_construct(c_msg);
     mrobot_driver_msgs::vci_can* msg = &long_msg;
-    if( msg->ID == 0 ) 
+    if( msg->ID == 0 )
     {
         return;
     }
@@ -198,14 +198,14 @@ void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstP
     if((ul_id = this->parse_laser_id(id)) == NOT_LASER_ID)
     {
         ROS_ERROR("laser CAN id not right");
-        return ; 
+        return ;
     }
 
     if(id.CanID_Struct.SourceID == LASER_CAN_SOURCE_ID_START_MEASUREMENT)
     {
         if(id.CanID_Struct.ACK == 1)
         {
-	    
+
             this->start_measure_time[ul_id] = ros::Time::now();
             this->distance[ul_id] = double(msg->Data[0])/100;
             extern uint16_t laser_test_data[13];
@@ -217,7 +217,7 @@ void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstP
     {
         uint8_t len;
         if(id.CanID_Struct.ACK == 1)
-        {   
+        {
             len = msg->Data[0];
             version[ul_id].resize(len);
             version[ul_id].clear();
@@ -226,7 +226,7 @@ void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstP
                 version[ul_id].push_back(*(char *)&(msg->Data[i+1]));
             }
             //memcpy(version[ul_id].cbegin(),&msg->Data[1], len);
-	    n.setParam(laser_version_param[ul_id],version[ul_id]);
+            n.setParam(laser_version_param[ul_id],version[ul_id]);
             ROS_WARN("laser %d version is %s",ul_id,version[ul_id].data());
 
         }
@@ -245,7 +245,7 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
 
 
     this->laser_msgs.header.stamp = ros::Time::now();
-    this->laser_msgs.header.frame_id = laser_frame_all;   
+    this->laser_msgs.header.frame_id = laser_frame_all;
 
 
 

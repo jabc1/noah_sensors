@@ -1,6 +1,6 @@
-/* 
- *  main.cpp 
- *  Author: Kaka Xie 
+/*
+ *  main.cpp
+ *  Author: Kaka Xie
  *  Date:2017/11/30
  */
 
@@ -72,9 +72,9 @@ int main(int argc, char **argv)
     {
         ROS_INFO("test log is off");
     }
-    Ultrasonic *ultrasonic = new Ultrasonic(is_log_on); 
-    Laser *laser = new Laser(is_log_on); 
-    Hall *hall = new Hall(is_log_on); 
+    Ultrasonic *ultrasonic = new Ultrasonic(is_log_on);
+    Laser *laser = new Laser(is_log_on);
+    Hall *hall = new Hall(is_log_on);
 
     if(ros::param::has("/noah_sensors/ultrasonic/max_range"))
     {
@@ -118,20 +118,20 @@ int main(int argc, char **argv)
             //for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
             if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)< ULTRASONIC_NUM_MAX)
             {
-                ultrasonic->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)); 
+                ultrasonic->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX));
                 usleep(1000 * 30);
                 ROS_INFO("start to get ultrasonic %d version",cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX));
             }
             else if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX) < ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
             {
-                laser->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX); 
+                laser->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX);
                 usleep(1000 * 30);
                 ROS_INFO("start to get laser %d version",cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX);
             }
             cnt++;
             if(cnt >= 3*(ULTRASONIC_NUM_MAX + LASER_NUM_MAX))
             {
-                get_mcu_version_init = 1; 
+                get_mcu_version_init = 1;
             }
         }
         if(get_machine_version_init == 0 )
@@ -243,7 +243,7 @@ int main(int argc, char **argv)
 
 #if 1//ultrasonic
             if(cnt % (uint32_t)(rate / 11 ) == 0)
-            {   
+            {
                 static uint8_t ul_id = 0;
                 static uint8_t group = 0;
                 if(ultrasonic->work_mode == ULTRASONIC_MODE_FORWARD)
@@ -307,7 +307,7 @@ int main(int argc, char **argv)
 
 #endif
 #if 0
-            if(ros::Time::now() - mode_test_start_time >= ros::Duration(mode_test_duration)) 
+            if(ros::Time::now() - mode_test_start_time >= ros::Duration(mode_test_duration))
             {
                 ultrasonic->work_mode++;
                 ultrasonic->is_mode_init = 0;
@@ -325,9 +325,9 @@ int main(int argc, char **argv)
 
 #if 1 //laser
             if(cnt % (uint32_t)(rate / 70) == 0)
-            {   
+            {
                 static uint32_t i = 0;
-                if(laser_en & (1<<(i % LASER_NUM_MAX)))                    
+                if(laser_en & (1<<(i % LASER_NUM_MAX)))
                     laser->start_measurement(i % LASER_NUM_MAX);
                 i++;
             }

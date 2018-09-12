@@ -3,7 +3,7 @@
 
 enum{
     INFRARED = 0,
-    ULTRASOUND = 1,  
+    ULTRASOUND = 1,
     HALL = 2,
 };
 

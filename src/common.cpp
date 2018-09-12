@@ -1,6 +1,6 @@
-/* 
- *  common.cpp 
- *  Author: Kaka Xie 
+/*
+ *  common.cpp
+ *  Author: Kaka Xie
  *  Date:2017/12/01
  */
 

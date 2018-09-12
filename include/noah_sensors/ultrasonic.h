@@ -21,19 +21,19 @@ using json = nlohmann::json;
 #define CAN_SOURCE_ID_MEASUREMENT_EN        0x81
 #define CAN_SOURCE_ID_SET_GROUP             0x83
 
-#define ULTRASONIC_NUM_MAX                  16 
-#define FILTER_BUF_SIZE                     2 
+#define ULTRASONIC_NUM_MAX                  16
+#define FILTER_BUF_SIZE                     2
 
 #define GROUP_PERIOD                        100//ms
 
 #define DISTANCE_MAX                        2.00
 #define DISTANCE_MIN                        0.01
 #define ERR_COMMUNICATE_TIME_OUT            1
-#define DISTANCE_ERR_TIME_OUT               2.55 
+#define DISTANCE_ERR_TIME_OUT               2.55
 
 enum
 {
-    
+
     ULTRASONIC_MODE_FORWARD     = 0,
     ULTRASONIC_MODE_BACKWARD    = 1,
     ULTRASONIC_MODE_TURNING     = 2,
@@ -115,7 +115,7 @@ class Ultrasonic
 
 
         uint32_t forward_separate[2];
-        int group_mode_forward[2][4] = 
+        int group_mode_forward[2][4] =
                 {
                     {10,11,0xff,0xff},
                     {0,1,12,13},
@@ -123,14 +123,14 @@ class Ultrasonic
                 };
 
         uint32_t backward_separate[2];
-        int group_mode_backward[2][2] = 
+        int group_mode_backward[2][2] =
                 {
                     {5,6},
                     {14,15},
                 };
 
         uint32_t turning_separate[3];
-        int group_mode_turning[3][6] = 
+        int group_mode_turning[3][6] =
                 {
                     {  10,  11,   5,   6,  14,  15},
                     {   0,   1,  12,  13,0xff,0xff},
@@ -162,7 +162,7 @@ class Ultrasonic
 
 
 #if 0
-        uint8_t id_group[6][3] = 
+        uint8_t id_group[6][3] =
         {
             //{10,  11,   3,   7 },
             //{0,   13,   5,   8 },
@@ -176,10 +176,10 @@ class Ultrasonic
             //{0xff,  2,  0xff},
             {1,  8,  0xff},
             {12,  6,  0xff}
-		
+
         };
 #else
-        uint8_t id_group[14][1] = 
+        uint8_t id_group[14][1] =
         {
 
             {0 },

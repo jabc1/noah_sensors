@@ -13,25 +13,25 @@ using json = nlohmann::json;
 
 #define LASER_CAN_SRC_MAC_ID_BASE      0x70
 
-#define LASER_CAN_SOURCE_ID_GET_VERSION		  0x01
-#define LASER_CAN_SOURCE_ID_START_MEASUREMENT     0x80
+#define LASER_CAN_SOURCE_ID_GET_VERSION             0x01
+#define LASER_CAN_SOURCE_ID_START_MEASUREMENT       0x80
 
-#define LASER_NUM_MAX                 13 
+#define LASER_NUM_MAX                 13
 
 
-#define LASER_DISTANCE_MAX                        1.20 
+#define LASER_DISTANCE_MAX                        1.20
 #define LASER_ERR_COMMUNICATE_TIME_OUT            1
-#define LASER_DISTANCE_ERR_TIME_OUT               2.55 
+#define LASER_DISTANCE_ERR_TIME_OUT               2.55
 #if 0
 enum{
     INFRARED = 0,
-    ULTRASOUND = 1,  
+    ULTRASOUND = 1,
     HALL = 2,
 };
 #endif
 
 
-class Laser 
+class Laser
 {
     public:
 

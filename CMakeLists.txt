@@ -37,7 +37,7 @@ add_dependencies(noah_sensors
 )
 
 target_link_libraries(noah_sensors
-  ${catkin_LIBRARIES} 
+  ${catkin_LIBRARIES}
 )
 
 #############
