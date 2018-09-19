@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "json.hpp"
-#include <mrobot_driver_msgs/vci_can.h>
+#include <mrobot_msgs/vci_can.h>
 #include <mrobot_msgs/sonar_msgs.h>
 #include <roscan/can_long_frame.h>
 #include <sensor_msgs/Range.h>
@@ -57,7 +57,7 @@ class Ultrasonic
             is_log_on = log_on;
             //ultrasonic_pub = n.advertise<std_msgs::String>("ultrasonic_to_can",1000);
             sensor_en = n.subscribe("/map_server_mrobot/region_params_changer/sensor_params",1000,sensor_en_cb);
-            pub_to_can_node = n.advertise<mrobot_driver_msgs::vci_can>("ultrasonic_to_can", 1000);
+            pub_to_can_node = n.advertise<mrobot_msgs::vci_can>("ultrasonic_to_can", 1000);
             version_ack_pub = n.advertise<std_msgs::String>("mcu_version_ack", 1000);
 
             sub_from_can_node = n.subscribe("can_to_ultrasonic", 1000, &Ultrasonic::rcv_from_can_node_callback, this);
@@ -84,7 +84,7 @@ class Ultrasonic
         void ultrasonic_en(uint8_t ul_id, bool en);
         int broadcast_measurement(uint32_t group);
         int set_group(uint8_t ul_id, uint8_t group);
-        void rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg);
+        void rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr &c_msg);
         void work_mode_callback(const std_msgs::UInt8MultiArray data);
         void get_mcu_version_callback(const std_msgs::String data);
         void update_status(void);
@@ -159,47 +159,6 @@ class Ultrasonic
         std::string machine_version;
 
         int param_get_test = 0;
-
-
-#if 0
-        uint8_t id_group[6][3] =
-        {
-            //{10,  11,   3,   7 },
-            //{0,   13,   5,   8 },
-            //{1,   9,  4,  0xff},
-            //{2,  6,  12,  0xff}
-
-            {0,  3,   7 },
-            {13,  9,  5},
-            {11, 4,  0xff},
-            {10,  2,  0xff},
-            //{0xff,  2,  0xff},
-            {1,  8,  0xff},
-            {12,  6,  0xff}
-
-        };
-#else
-        uint8_t id_group[14][1] =
-        {
-
-            {0 },
-            {1 },
-            {2},
-            {3},
-            //{10,  2,  0xff},
-            {4},
-            {5},
-            {6},
-            {7},
-            {8},
-            //{10,  2,  0xff},
-            {9},
-            {10},
-            {11},
-            {12},
-            {13}
-        };
-#endif
 
     private:
         ros::NodeHandle n;

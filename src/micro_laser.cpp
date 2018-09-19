@@ -27,7 +27,7 @@
 #include "cstdlib"
 #include "string"
 #include "sstream"
-#include <mrobot_driver_msgs/vci_can.h>
+#include <mrobot_msgs/vci_can.h>
 #include <roscan/can_long_frame.h>
 #include <laser.h>
 #include <common.h>
@@ -55,7 +55,7 @@ int Laser::start_measurement(uint8_t laser_id)
     {
         return -1;
     }
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = LASER_CAN_SOURCE_ID_START_MEASUREMENT;//
@@ -80,7 +80,7 @@ void Laser::get_version(uint8_t ul_id)
     {
         return ;
     }
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = LASER_CAN_SOURCE_ID_GET_VERSION;
@@ -165,15 +165,15 @@ void Laser::get_mcu_version_callback(const std_msgs::String data)
 }
 
 
-void Laser::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg)
+void Laser::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr &c_msg)
 {
-    mrobot_driver_msgs::vci_can can_msg;
-    mrobot_driver_msgs::vci_can long_msg;
+    mrobot_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can long_msg;
     CAN_ID_UNION id;
     uint8_t ul_id;
     //ROS_INFO("%s",__func__);
     long_msg = this->long_frame.frame_construct(c_msg);
-    mrobot_driver_msgs::vci_can* msg = &long_msg;
+    mrobot_msgs::vci_can* msg = &long_msg;
     if( msg->ID == 0 )
     {
         return;
@@ -247,8 +247,6 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
     this->laser_msgs.header.stamp = ros::Time::now();
     this->laser_msgs.header.frame_id = laser_frame_all;
 
-
-
     //n.getParam("ultrasonic_test",param_get_test);
     //ROS_ERROR("param_get_test is %d",param_get_test);
 
@@ -260,11 +258,6 @@ void Laser::pub_laser_data_to_navigation(double * ul_data)
         this->laser_msgs.sonars[i] = laser_data;
     }
     this->laser_pub_to_navigation_all.publish(this->laser_msgs);
-
-
-
-
-
 
 
     if(close_all_flag == 0)

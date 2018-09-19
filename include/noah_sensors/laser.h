@@ -1,7 +1,7 @@
 #include "ros/ros.h"
 #include "std_msgs/String.h"
 #include "json.hpp"
-#include <mrobot_driver_msgs/vci_can.h>
+#include <mrobot_msgs/vci_can.h>
 #include <roscan/can_long_frame.h>
 #include <sensor_msgs/Range.h>
 #include <sensor_msgs/PointCloud2.h>
@@ -39,7 +39,7 @@ class Laser
         {
             is_log_on = log_on;
 
-            pub_to_can_node = n.advertise<mrobot_driver_msgs::vci_can>("laser_to_can", 1000);
+            pub_to_can_node = n.advertise<mrobot_msgs::vci_can>("laser_to_can", 1000);
             sub_from_can_node = n.subscribe("can_to_micro_laser", 1000, &Laser::rcv_from_can_node_callback, this);
             pub_to_navigation = n.advertise<sensor_msgs::Range>("laser_msg",20);
             laser_pub_to_navigation_all = n.advertise<mrobot_msgs::sonar_msgs>("laser_msg_all",20);
@@ -49,7 +49,7 @@ class Laser
 
         int start_measurement(uint8_t ul_id);
         void get_version(uint8_t ul_id);
-        void rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg);
+        void rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr &c_msg);
         void update_status(void);
         void get_mcu_version_callback(const std_msgs::String data);
         void pub_laser_data_to_navigation(double *data);

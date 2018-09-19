@@ -30,7 +30,7 @@
 #include "cstdlib"
 #include "string"
 #include "sstream"
-#include <mrobot_driver_msgs/vci_can.h>
+#include <mrobot_msgs/vci_can.h>
 #include <roscan/can_long_frame.h>
 #include <ultrasonic.h>
 #include <common.h>
@@ -55,7 +55,7 @@ void Ultrasonic::get_version(uint8_t ul_id)
     {
         return ;
     }
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_GET_VERSION;
@@ -80,7 +80,7 @@ int Ultrasonic::start_measurement(uint8_t ul_id)
     {
         return -1;
     }
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_START_MEASUREMENT;
@@ -105,7 +105,7 @@ void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)
     {
         return ;
     }
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_MEASUREMENT_EN;
@@ -127,7 +127,7 @@ int Ultrasonic::broadcast_measurement(uint32_t group)
 {
     //ROS_ERROR("%s",__func__);
     int error = 0;
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_START_MEASUREMENT;
@@ -159,7 +159,7 @@ int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
         ROS_ERROR("ul_id is not right, set group failed ! !");
         return -1;
     }
-    mrobot_driver_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can can_msg;
     CAN_ID_UNION id;
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_SET_GROUP;
@@ -448,6 +448,7 @@ double Ultrasonic::merge_min_distance_data(double data1, double data2)
     }
     return min_data;
 }
+
 void Ultrasonic::merge_all_min_distance_data(void)
 {
     if(16 == ultrasonic_real_num )
@@ -462,15 +463,15 @@ void Ultrasonic::merge_all_min_distance_data(void)
     }
 }
 
-void Ultrasonic::rcv_from_can_node_callback(const mrobot_driver_msgs::vci_can::ConstPtr &c_msg)
+void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr &c_msg)
 {
-    mrobot_driver_msgs::vci_can can_msg;
-    mrobot_driver_msgs::vci_can long_msg;
+    mrobot_msgs::vci_can can_msg;
+    mrobot_msgs::vci_can long_msg;
     CAN_ID_UNION id;
     uint8_t ul_id;
     //ROS_INFO("%s",__func__);
     long_msg = this->long_frame.frame_construct(c_msg);
-    mrobot_driver_msgs::vci_can* msg = &long_msg;
+    mrobot_msgs::vci_can* msg = &long_msg;
     if( msg->ID == 0 )
     {
         return;
