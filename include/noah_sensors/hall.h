@@ -24,7 +24,7 @@ class Hall
             hall_sub = n.subscribe("hall_to_starline_node", 1000, &Hall::hall_state_callback, this);
         }
         bool is_log_on;
-        bool hall_state[HALL_NUM] = {false,false};
+        bool hall_state[HALL_NUM] = {false, false};
         void pub_hall_data(bool *state);
 
     private:

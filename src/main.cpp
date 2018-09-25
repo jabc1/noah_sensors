@@ -54,8 +54,8 @@ int main(int argc, char **argv)
     ROS_INFO("creating noah sensors node...");
     if(ros::param::has("noah_sensors_can_data_log_on"))
     {
-        ros::param::get("/noah_sensors_can_data_log_on",is_log_on);
-        ROS_INFO("can data log is %d",is_log_on);
+        ros::param::get("/noah_sensors_can_data_log_on", is_log_on);
+        ROS_INFO("can data log is %d", is_log_on);
     }
     else
     {
@@ -65,8 +65,8 @@ int main(int argc, char **argv)
 
     if(ros::param::has("test_log_on"))
     {
-        ros::param::get("/test_log_on",test_log_on);
-        ROS_INFO("test log is %d",test_log_on);
+        ros::param::get("/test_log_on", test_log_on);
+        ROS_INFO("test log is %d", test_log_on);
     }
     else
     {
@@ -78,8 +78,8 @@ int main(int argc, char **argv)
 
     if(ros::param::has("/noah_sensors/ultrasonic/max_range"))
     {
-        ros::param::get("/noah_sensors/ultrasonic/max_range",ultrasonic->max_range);
-        ROS_INFO("ultrasonic max range is %f",ultrasonic->max_range);
+        ros::param::get("/noah_sensors/ultrasonic/max_range", ultrasonic->max_range);
+        ROS_INFO("ultrasonic max range is %f", ultrasonic->max_range);
     }
     else
     {
@@ -89,8 +89,8 @@ int main(int argc, char **argv)
 
     if(ros::param::has("/noah_sensors/ultrasonic/min_range"))
     {
-        ros::param::get("/noah_sensors/ultrasonic/min_range",ultrasonic->min_range);
-        ROS_INFO("ultrasonic max range is %f",ultrasonic->min_range);
+        ros::param::get("/noah_sensors/ultrasonic/min_range", ultrasonic->min_range);
+        ROS_INFO("ultrasonic max range is %f", ultrasonic->min_range);
     }
     else
     {
@@ -106,7 +106,7 @@ int main(int argc, char **argv)
     bool get_machine_version_init = 0;
     static uint8_t pre_mode = ULTRASONIC_MODE_NONE;
     ros::Time mode_test_start_time = ros::Time::now();
-    ros::Duration mode_test_duration(random()%(MODE_TEST_DURATION_MAX - MODE_TEST_DURATION_MIN) + MODE_TEST_DURATION_MIN);//random 100~1000 seconds
+    ros::Duration mode_test_duration(random() % (MODE_TEST_DURATION_MAX - MODE_TEST_DURATION_MIN) + MODE_TEST_DURATION_MIN);//random 100~1000 seconds
 
     ultrasonic->work_mode = ULTRASONIC_MODE_FORWARD;
     sleep(1.5);
@@ -116,20 +116,20 @@ int main(int argc, char **argv)
         {
             static uint8_t cnt = 0;
             //for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
-            if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)< ULTRASONIC_NUM_MAX)
+            if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX) < ULTRASONIC_NUM_MAX)
             {
                 ultrasonic->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX));
                 usleep(1000 * 30);
-                ROS_INFO("start to get ultrasonic %d version",cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX));
+                ROS_INFO("start to get ultrasonic %d version", cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX));
             }
             else if(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX) < ULTRASONIC_NUM_MAX + LASER_NUM_MAX)
             {
-                laser->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX);
+                laser->get_version(cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX) - ULTRASONIC_NUM_MAX);
                 usleep(1000 * 30);
-                ROS_INFO("start to get laser %d version",cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX)- ULTRASONIC_NUM_MAX);
+                ROS_INFO("start to get laser %d version", cnt % (ULTRASONIC_NUM_MAX + LASER_NUM_MAX) - ULTRASONIC_NUM_MAX);
             }
             cnt++;
-            if(cnt >= 3*(ULTRASONIC_NUM_MAX + LASER_NUM_MAX))
+            if(cnt >= 3 * (ULTRASONIC_NUM_MAX + LASER_NUM_MAX))
             {
                 get_mcu_version_init = 1;
             }
@@ -179,18 +179,18 @@ int main(int argc, char **argv)
                     group_id_t group_id;
                     ultrasonic->current_work_mode_ul = 0;
 
-                    for(uint8_t i=0; i<sizeof(ultrasonic->group_mode_forward) / sizeof(ultrasonic->group_mode_forward[0]); i++)
+                    for(uint8_t i = 0; i < sizeof(ultrasonic->group_mode_forward) / sizeof(ultrasonic->group_mode_forward[0]); i++)
                     {
                         ultrasonic->forward_separate[i] = 0;
-                        for(uint8_t j=0; j<sizeof(ultrasonic->group_mode_forward[0]) / sizeof(ultrasonic->group_mode_forward[0][0]); j++)
+                        for(uint8_t j = 0; j < sizeof(ultrasonic->group_mode_forward[0]) / sizeof(ultrasonic->group_mode_forward[0][0]); j++)
                         {
                             group_id.id = ultrasonic->group_mode_forward[i][j];
                             if(group_id.id < ULTRASONIC_NUM_MAX)
                             {
                                 if(group_id.id < 32)
                                 {
-                                    ultrasonic->current_work_mode_ul |= 1<<group_id.id;
-                                    ultrasonic->forward_separate[i] |= 1<<group_id.id;
+                                    ultrasonic->current_work_mode_ul |= 1 << group_id.id;
+                                    ultrasonic->forward_separate[i] |= 1 << group_id.id;
                                 }
                             }
                         }
@@ -205,10 +205,10 @@ int main(int argc, char **argv)
                     group_id_t group_id;
                     ultrasonic->current_work_mode_ul = 0;
 
-                    for(uint8_t i=0; i<sizeof(ultrasonic->group_mode_backward) / sizeof(ultrasonic->group_mode_backward[0]); i++)
+                    for(uint8_t i = 0; i < sizeof(ultrasonic->group_mode_backward) / sizeof(ultrasonic->group_mode_backward[0]); i++)
                     {
                         ultrasonic->backward_separate[i] = 0;
-                        for(uint8_t j=0; j<sizeof(ultrasonic->group_mode_backward[0]) / sizeof(ultrasonic->group_mode_backward[0][0]); j++)
+                        for(uint8_t j = 0; j < sizeof(ultrasonic->group_mode_backward[0]) / sizeof(ultrasonic->group_mode_backward[0][0]); j++)
                         {
                             group_id.id = ultrasonic->group_mode_backward[i][j];
                             if(group_id.id < ULTRASONIC_NUM_MAX)
@@ -233,7 +233,7 @@ int main(int argc, char **argv)
             ack.data.push_back(ultrasonic->work_mode);
             ultrasonic->work_mode_ack_pub.publish(ack);
             //ultrasonic->ack_work_mode(ultrasonic->work_mode);
-            ros::param::set("/noah_sensors/ultrasonic_work_mode_ack",ultrasonic->work_mode);
+            ros::param::set("/noah_sensors/ultrasonic_work_mode_ack", ultrasonic->work_mode);
         }
 
         /*---------------------  test code  --------------------------*/
@@ -327,7 +327,7 @@ int main(int argc, char **argv)
             if(cnt % (uint32_t)(rate / 70) == 0)
             {
                 static uint32_t i = 0;
-                if(laser_en & (1<<(i % LASER_NUM_MAX)))
+                if(laser_en & (1 << (i % LASER_NUM_MAX)))
                     laser->start_measurement(i % LASER_NUM_MAX);
                 i++;
             }
@@ -356,7 +356,7 @@ int main(int argc, char **argv)
                     ultrasonic->test_data.data.clear();
                     for(uint8_t i = 0; i < ULTRASONIC_NUM_MAX; i++)
                     {
-                        ultrasonic->test_data.data.push_back((uint8_t)(ultrasonic->distance_hw_test[i]*100));
+                        ultrasonic->test_data.data.push_back((uint8_t)(ultrasonic->distance_hw_test[i] * 100));
                     }
                     for(uint8_t i = 0; i < LASER_NUM_MAX; i++)
                     {

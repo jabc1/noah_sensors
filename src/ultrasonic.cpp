@@ -85,7 +85,7 @@ int Ultrasonic::start_measurement(uint8_t ul_id)
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_START_MEASUREMENT;
     id.CanID_Struct.SrcMACID = 1;
-    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE+ ul_id;
+    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE + ul_id;
     id.CanID_Struct.FUNC_ID = 0x02;
     id.CanID_Struct.ACK = 0;
     id.CanID_Struct.res = 0;
@@ -110,7 +110,7 @@ void Ultrasonic::ultrasonic_en(uint8_t ul_id, bool en)
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_MEASUREMENT_EN;
     id.CanID_Struct.SrcMACID = 1;
-    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE+ ul_id;
+    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE + ul_id;
     id.CanID_Struct.FUNC_ID = 0x02;
     id.CanID_Struct.ACK = 0;
     id.CanID_Struct.res = 0;
@@ -164,7 +164,7 @@ int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_SET_GROUP;
     id.CanID_Struct.SrcMACID = 1;
-    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE+ ul_id;
+    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE + ul_id;
     id.CanID_Struct.FUNC_ID = 0x02;
     id.CanID_Struct.ACK = 0;
     id.CanID_Struct.res = 0;
@@ -175,22 +175,21 @@ int Ultrasonic::set_group(uint8_t ul_id, uint8_t group)
     can_msg.Data[0] = 0x00;
     can_msg.Data[1] = group;
     this->pub_to_can_node.publish(can_msg);
-    ROS_ERROR("set ultrasonic %d to group %d",ul_id, group);
+    ROS_ERROR("set ultrasonic %d to group %d", ul_id, group);
     return error;
 }
 
-
 void Ultrasonic::update_measure_en(uint32_t ul_en)
 {
-    if(ul_en<<(32 - ultrasonic_real_num) == measure_en_ack<<(32 - ultrasonic_real_num))
+    if(ul_en << (32 - ultrasonic_real_num) == measure_en_ack << (32 - ultrasonic_real_num))
         return;
     if(ros::Time::now() - sensor_en_start_time < ros::Duration(4))
     {
         for(uint8_t i = 0; i < ultrasonic_real_num; i++)
         {
-            if( (ul_en^measure_en_ack) &(1<<i) )
+            if( (ul_en ^ measure_en_ack) & (1 << i) )
             {
-                this->ultrasonic_en(i,(ul_en>>i) &0x01);
+                this->ultrasonic_en(i, (ul_en >> i) & 0x01);
                 //ROS_ERROR("set %d to %d",i, (ul_en>>i) &0x01);
             }
         }
@@ -210,12 +209,12 @@ bool Ultrasonic::is_ultrasonic_work_mode(int mode)
 void Ultrasonic::updata_work_mode(void)
 {
     int get_work_mode = 0;
-    n.getParam("/noah_sensors/ultrasonic_work_mode",get_work_mode);
+    n.getParam("/noah_sensors/ultrasonic_work_mode", get_work_mode);
     if(is_ultrasonic_work_mode(get_work_mode) == true)
     {
         if(this->work_mode != get_work_mode)
         {
-            ROS_WARN("change work mode from %d to %d",this->work_mode,get_work_mode);
+            ROS_WARN("change work mode from %d to %d", this->work_mode, get_work_mode);
             this->work_mode = get_work_mode;
             this->is_mode_init = 0;
         }
@@ -226,14 +225,14 @@ void Ultrasonic::updata_measure_range(void)
 {
     static double max_range_tmp = 0;
     static double min_range_tmp = 0;
-    n.getParam("/noah_sensors/ultrasonic/max_range",this->max_range);
-    n.getParam("/noah_sensors/ultrasonic/min_range",this->min_range);
+    n.getParam("/noah_sensors/ultrasonic/max_range", this->max_range);
+    n.getParam("/noah_sensors/ultrasonic/min_range", this->min_range);
     if(max_range > min_range + 0.0001)
     {
         if((abs(max_range_tmp - max_range) > 0.0001) || (abs(min_range_tmp - min_range) > 0.0001))
         {
-            ROS_WARN("change max_range from %f to %f",max_range_tmp,this->max_range);
-            ROS_WARN("change min_range from %f to %f",min_range_tmp,this->min_range);
+            ROS_WARN("change max_range from %f to %f", max_range_tmp, this->max_range);
+            ROS_WARN("change min_range from %f to %f", min_range_tmp, this->min_range);
         }
         max_range_tmp = this->max_range;
         min_range_tmp = this->min_range;
@@ -244,8 +243,8 @@ int Ultrasonic::get_machine_version(void)
 {
     if(ros::param::has("/noah_machine_version"))
     {
-        ros::param::get("/noah_machine_version",machine_version);
-        ROS_INFO("get noah machine version: %s",machine_version.data());
+        ros::param::get("/noah_machine_version", machine_version);
+        ROS_INFO("get noah machine version: %s", machine_version.data());
     }
     else
         return -1;
@@ -274,14 +273,14 @@ int Ultrasonic::get_machine_version(void)
             {   2,   4,   3,   7,   8,   9}
         };
 
-        memcpy(group_mode_forward,group_mode_forward_tmp, sizeof(group_mode_forward_tmp));
-        memcpy(group_mode_backward,group_mode_backward_tmp, sizeof(group_mode_backward_tmp));
-        memcpy(group_mode_turning,group_mode_turning_tmp, sizeof(group_mode_turning_tmp));
+        memcpy(group_mode_forward, group_mode_forward_tmp, sizeof(group_mode_forward_tmp));
+        memcpy(group_mode_backward, group_mode_backward_tmp, sizeof(group_mode_backward_tmp));
+        memcpy(group_mode_turning, group_mode_turning_tmp, sizeof(group_mode_turning_tmp));
 
         std::cout<<"forward group"<<endl;
-        for(int i = 0; i < sizeof(group_mode_forward_tmp)/sizeof(group_mode_forward_tmp[0]); i++)
+        for(int i = 0; i < sizeof(group_mode_forward_tmp) / sizeof(group_mode_forward_tmp[0]); i++)
         {
-            for(int j = 0; j < sizeof(group_mode_forward_tmp[0])/sizeof(group_mode_forward_tmp[0][0]); j++)
+            for(int j = 0; j < sizeof(group_mode_forward_tmp[0]) / sizeof(group_mode_forward_tmp[0][0]); j++)
             {
                 std::cout<<group_mode_forward[i][j]<<",";
             }
@@ -289,9 +288,9 @@ int Ultrasonic::get_machine_version(void)
         }
 
         std::cout<<"backward group"<<endl;
-        for(int i = 0; i < sizeof(group_mode_backward_tmp)/sizeof(group_mode_backward_tmp[0]); i++)
+        for(int i = 0; i < sizeof(group_mode_backward_tmp) / sizeof(group_mode_backward_tmp[0]); i++)
         {
-            for(int j = 0; j < sizeof(group_mode_backward_tmp[0])/sizeof(group_mode_backward_tmp[0][0]); j++)
+            for(int j = 0; j < sizeof(group_mode_backward_tmp[0]) / sizeof(group_mode_backward_tmp[0][0]); j++)
             {
                 std::cout<<group_mode_backward[i][j]<<",";
             }
@@ -299,9 +298,9 @@ int Ultrasonic::get_machine_version(void)
         }
 
         std::cout<<"turning group"<<endl;
-        for(int i = 0; i < sizeof(group_mode_turning_tmp)/sizeof(group_mode_turning_tmp[0]); i++)
+        for(int i = 0; i < sizeof(group_mode_turning_tmp) / sizeof(group_mode_turning_tmp[0]); i++)
         {
-            for(int j = 0; j < sizeof(group_mode_turning_tmp[0])/sizeof(group_mode_turning_tmp[0][0]); j++)
+            for(int j = 0; j < sizeof(group_mode_turning_tmp[0]) / sizeof(group_mode_turning_tmp[0][0]); j++)
             {
                 std::cout<<group_mode_turning[i][j]<<",";
             }
@@ -331,14 +330,14 @@ int Ultrasonic::get_machine_version(void)
             {   2,   4,   3,   7,   8,   9}
         };
 
-        memcpy(group_mode_forward,group_mode_forward_tmp, sizeof(group_mode_forward_tmp));
-        memcpy(group_mode_backward,group_mode_backward_tmp, sizeof(group_mode_backward_tmp));
-        memcpy(group_mode_turning,group_mode_turning_tmp, sizeof(group_mode_turning_tmp));
+        memcpy(group_mode_forward, group_mode_forward_tmp, sizeof(group_mode_forward_tmp));
+        memcpy(group_mode_backward, group_mode_backward_tmp, sizeof(group_mode_backward_tmp));
+        memcpy(group_mode_turning, group_mode_turning_tmp, sizeof(group_mode_turning_tmp));
 
         std::cout<<"forward group"<<endl;
-        for(int i = 0; i < sizeof(group_mode_forward_tmp)/sizeof(group_mode_forward_tmp[0]); i++)
+        for(int i = 0; i < sizeof(group_mode_forward_tmp) / sizeof(group_mode_forward_tmp[0]); i++)
         {
-            for(int j = 0; j < sizeof(group_mode_forward_tmp[0])/sizeof(group_mode_forward_tmp[0][0]); j++)
+            for(int j = 0; j < sizeof(group_mode_forward_tmp[0]) / sizeof(group_mode_forward_tmp[0][0]); j++)
             {
                 std::cout<<group_mode_forward[i][j]<<",";
             }
@@ -346,9 +345,9 @@ int Ultrasonic::get_machine_version(void)
         }
 
         std::cout<<"backward group"<<endl;
-        for(int i = 0; i < sizeof(group_mode_backward_tmp)/sizeof(group_mode_backward_tmp[0]); i++)
+        for(int i = 0; i < sizeof(group_mode_backward_tmp) / sizeof(group_mode_backward_tmp[0]); i++)
         {
-            for(int j = 0; j < sizeof(group_mode_backward_tmp[0])/sizeof(group_mode_backward_tmp[0][0]); j++)
+            for(int j = 0; j < sizeof(group_mode_backward_tmp[0]) / sizeof(group_mode_backward_tmp[0][0]); j++)
             {
                 std::cout<<group_mode_backward[i][j]<<",";
             }
@@ -356,9 +355,9 @@ int Ultrasonic::get_machine_version(void)
         }
 
         std::cout<<"turning group"<<endl;
-        for(int i = 0; i < sizeof(group_mode_turning_tmp)/sizeof(group_mode_turning_tmp[0]); i++)
+        for(int i = 0; i < sizeof(group_mode_turning_tmp) / sizeof(group_mode_turning_tmp[0]); i++)
         {
-            for(int j = 0; j < sizeof(group_mode_turning_tmp[0])/sizeof(group_mode_turning_tmp[0][0]); j++)
+            for(int j = 0; j < sizeof(group_mode_turning_tmp[0]) / sizeof(group_mode_turning_tmp[0][0]); j++)
             {
                 std::cout<<group_mode_turning[i][j]<<",";
             }
@@ -380,7 +379,6 @@ void Ultrasonic::pub_json_msg( const nlohmann::json j_msg)
     this->version_ack_pub.publish(pub_json_msg);
 }
 
-
 void Ultrasonic::get_mcu_version_callback(const std_msgs::String data)
 {
     json j;
@@ -390,7 +388,7 @@ void Ultrasonic::get_mcu_version_callback(const std_msgs::String data)
     {
         j =
         {
-            {"version_ack","sensors"},
+            {"version_ack", "sensors"},
             {
                 "data",
                 {
@@ -405,7 +403,7 @@ void Ultrasonic::get_mcu_version_callback(const std_msgs::String data)
 
 bool Ultrasonic::is_ultrasonic_can_id(CAN_ID_UNION id)
 {
-    if((id.CanID_Struct.SrcMACID >= 0x60)&&(id.CanID_Struct.SrcMACID <= 0x6f))
+    if((id.CanID_Struct.SrcMACID >= 0x60) && (id.CanID_Struct.SrcMACID <= 0x6f))
     {
         return true ;
     }
@@ -416,7 +414,7 @@ bool Ultrasonic::is_ultrasonic_can_id(CAN_ID_UNION id)
 #define NOT_ULTRASONIC_ID      0xff
 uint8_t Ultrasonic::parse_ultrasonic_id(CAN_ID_UNION id)
 {
-    if((id.CanID_Struct.SrcMACID >= 0x60)&&(id.CanID_Struct.SrcMACID <= 0x6f))
+    if((id.CanID_Struct.SrcMACID >= 0x60) && (id.CanID_Struct.SrcMACID <= 0x6f))
     {
         return id.CanID_Struct.SrcMACID - ULTRASONIC_CAN_SRC_MAC_ID_BASE;
     }
@@ -427,7 +425,7 @@ uint8_t Ultrasonic::parse_ultrasonic_id(CAN_ID_UNION id)
 double Ultrasonic::merge_min_distance_data(double data1, double data2)
 {
     double min_data = 0;
-    if( (abs(data1) >= 0.000001)  &&  (abs(data2) >= 0.000001) )
+    if( (abs(data1) >= 0.000001) && (abs(data2) >= 0.000001) )
     {
         min_data = min(data1, data2);
     }
@@ -480,7 +478,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
     {
         for(uint8_t i = 0; i < msg->DataLen; i++)
         {
-            ROS_INFO("msg->Data[%d] = 0x%x",i,msg->Data[i]);
+            ROS_INFO("msg->Data[%d] = 0x%x", i, msg->Data[i]);
         }
     }
     can_msg.ID = msg->ID;
@@ -534,7 +532,7 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
 
             this->distance[ul_id] = this->distance_raw[ul_id];
             this->distance_hw_test[ul_id] = this->distance_raw[ul_id];
-            measure_en_ack |= 1<<ul_id; //we can receive measurement data, so this ultrasonic is enable !
+            measure_en_ack |= 1 << ul_id; //we can receive measurement data, so this ultrasonic is enable !
         }
     }
 
@@ -544,15 +542,15 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
         {
             if(msg->Data[0] == 0)
             {
-                measure_en_ack &= ~(1<<ul_id);
+                measure_en_ack &= ~(1 << ul_id);
             }
             else if(msg->Data[0] == 1)
             {
-                measure_en_ack |= 1<<ul_id;
+                measure_en_ack |= 1 << ul_id;
             }
-            ROS_WARN("get ultrasonic id %d enable is %d ",ul_id,msg->Data[0]);
-            ROS_WARN("measure_en_ack: %x ",measure_en_ack);
-            ROS_WARN("measure_en: %x ",sonar_en);
+            ROS_WARN("get ultrasonic id %d enable is %d ", ul_id, msg->Data[0]);
+            ROS_WARN("measure_en_ack: %x ", measure_en_ack);
+            ROS_WARN("measure_en: %x ", sonar_en);
 
         }
     }
@@ -577,9 +575,8 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
                         }
                     }
                 }
-                ROS_WARN("ultrasonic %d group is %d",ul_id,group[ul_id]);
+                ROS_WARN("ultrasonic %d group is %d", ul_id, group[ul_id]);
             }
-
         }
     }
 
@@ -593,16 +590,15 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
             version[ul_id].clear();
             for(uint8_t i = 0; i < len; i++)
             {
-                version[ul_id].push_back(*(char *)&(msg->Data[i+1]));
+                version[ul_id].push_back(*(char *)&(msg->Data[i + 1]));
             }
             //memcpy(version[ul_id].cbegin(),&msg->Data[1], len);
-            n.setParam(ultrasonic_version_param[ul_id],version[ul_id]);
-            ROS_WARN("ultrasonic %d version is %s",ul_id,version[ul_id].data());
+            n.setParam(ultrasonic_version_param[ul_id], version[ul_id]);
+            ROS_WARN("ultrasonic %d version is %s", ul_id, version[ul_id].data());
 
         }
     }
 }
-
 
 void Ultrasonic::work_mode_callback(const std_msgs::UInt8MultiArray set_mode)
 {

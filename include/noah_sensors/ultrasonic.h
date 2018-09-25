@@ -56,7 +56,7 @@ class Ultrasonic
         {
             is_log_on = log_on;
             //ultrasonic_pub = n.advertise<std_msgs::String>("ultrasonic_to_can",1000);
-            sensor_en = n.subscribe("/map_server_mrobot/region_params_changer/sensor_params",1000,sensor_en_cb);
+            sensor_en = n.subscribe("/map_server_mrobot/region_params_changer/sensor_params", 1000, sensor_en_cb);
             pub_to_can_node = n.advertise<mrobot_msgs::vci_can>("ultrasonic_to_can", 1000);
             version_ack_pub = n.advertise<std_msgs::String>("mcu_version_ack", 1000);
 
@@ -67,13 +67,13 @@ class Ultrasonic
             get_mcu_version_sub = n.subscribe("get_mcu_version", 10, &Ultrasonic::get_mcu_version_callback, this);
 
 
-            ultrasonic_pub_to_navigation = n.advertise<sensor_msgs::Range>("sonar_msg",20);
-            ultrasonic_pub_to_navigation_all = n.advertise<mrobot_msgs::sonar_msgs>("sonar_msg_all",20);
-            work_mode_ack_pub = n.advertise<std_msgs::UInt8MultiArray>("ultrasonic_work_mode_ack",20);
+            ultrasonic_pub_to_navigation = n.advertise<sensor_msgs::Range>("sonar_msg", 20);
+            ultrasonic_pub_to_navigation_all = n.advertise<mrobot_msgs::sonar_msgs>("sonar_msg_all", 20);
+            work_mode_ack_pub = n.advertise<std_msgs::UInt8MultiArray>("ultrasonic_work_mode_ack", 20);
             set_work_mode_start_time = ros::Time::now();
 
 
-            test_data_pub = n.advertise<std_msgs::UInt8MultiArray>("sensors_test_data",20);//just for hardware test
+            test_data_pub = n.advertise<std_msgs::UInt8MultiArray>("sensors_test_data", 20);//just for hardware test
 
             group_id_vec.clear();
             ultrasonic_msgs.sonars.resize(ULTRASONIC_NUM_MAX - 1);
