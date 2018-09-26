@@ -60,7 +60,7 @@ void Ultrasonic::get_version(uint8_t ul_id)
     memset(&id, 0x0, sizeof(CAN_ID_UNION));
     id.CanID_Struct.SourceID = CAN_SOURCE_ID_GET_VERSION;
     id.CanID_Struct.SrcMACID = 1;
-    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE+ ul_id;
+    id.CanID_Struct.DestMACID = ULTRASONIC_CAN_SRC_MAC_ID_BASE + ul_id;
     id.CanID_Struct.FUNC_ID = 0x02;
     id.CanID_Struct.ACK = 0;
     id.CanID_Struct.res = 0;
@@ -513,14 +513,14 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
             this->start_measure_time[ul_id] = ros::Time::now();
 
             distance_tmp = msg->Data[0];
-            distance_tmp += msg->Data[1]<<8;
+            distance_tmp += msg->Data[1] << 8;
 
             if((distance_tmp < 3) && (distance_tmp > 0))
             {
                 distance_tmp = 3;
             }
 
-            this->distance_raw[ul_id] = double(distance_tmp)/100;
+            this->distance_raw[ul_id] = double(distance_tmp) / 100;
             if((this->distance_raw[ul_id] >= this->max_range - 0.00001) || (abs(this->distance_raw[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
             {
                 this->distance_raw[ul_id] = this->max_range;

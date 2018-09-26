@@ -34,7 +34,7 @@ uint32_t laser_en = 0xffffffff;
 ros::Time  sensor_en_start_time;
 void sensor_en_cb(const std_msgs::String::ConstPtr &msg)
 {
-    ROS_INFO("%s",__func__);
+    ROS_INFO("%s", __func__);
     sensor_en_start_time = ros::Time::now();
     auto j = json::parse(msg->data.c_str());
     if(j.find("params") != j.end())
@@ -42,12 +42,12 @@ void sensor_en_cb(const std_msgs::String::ConstPtr &msg)
         if(j["params"].find("enable_supersonic") != j["params"].end())
         {
             sonar_en = j["params"]["enable_supersonic"];
-            ROS_INFO("find enable_supersonic: 0x%x",sonar_en);
+            ROS_INFO("find enable_supersonic: 0x%x", sonar_en);
         }
         if(j["params"].find("enable_microlaser") != j["params"].end())
         {
             laser_en = j["params"]["enable_microlaser"];
-            ROS_INFO("find enable_microlaser: 0x%x",laser_en);
+            ROS_INFO("find enable_microlaser: 0x%x", laser_en);
         }
     }
 }

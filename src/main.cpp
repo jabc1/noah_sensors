@@ -153,10 +153,10 @@ int main(int argc, char **argv)
                     pre_mode = ULTRASONIC_MODE_TURNING;
                     group_id_t group_id;
                     ultrasonic->current_work_mode_ul = 0;
-                    for(uint8_t i=0; i<sizeof(ultrasonic->group_mode_turning) / sizeof(ultrasonic->group_mode_turning[0]); i++)
+                    for(uint8_t i = 0; i < sizeof(ultrasonic->group_mode_turning) / sizeof(ultrasonic->group_mode_turning[0]); i++)
                     {
                         ultrasonic->turning_separate[i] = 0;
-                        for(uint8_t j=0; j<sizeof(ultrasonic->group_mode_turning[0]) / sizeof(ultrasonic->group_mode_turning[0][0]); j++)
+                        for(uint8_t j = 0; j < sizeof(ultrasonic->group_mode_turning[0]) / sizeof(ultrasonic->group_mode_turning[0][0]); j++)
                         {
                             group_id.id = ultrasonic->group_mode_turning[i][j];
                             if(group_id.id < ULTRASONIC_NUM_MAX)

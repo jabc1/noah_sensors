@@ -35,7 +35,7 @@ void Hall::hall_state_callback(std_msgs::UInt8MultiArray data)
     for(j = 0; j < HALL_NUM; j++)
     {
         this->hall_state[j] = data.data[j];
-        ROS_INFO("hall %d state is %d",j, data.data[j]);
+        ROS_INFO("hall %d state is %d", j, data.data[j]);
     }
     pub_hall_data(this->hall_state);
 }
@@ -65,12 +65,12 @@ void Hall::pub_hall_data(bool *hall)
         j.clear();
         j =
         {
-            {"sensor_name","hall_sensor"},
-            {"data",{
+            {"sensor_name", "hall_sensor"},
+            {"data", {
 
-                        {"hall_1", (bool)hall[0]},
-                        {"hall_2", (bool)hall[1]},
-                    },
+                         {"hall_1", (bool)hall[0]},
+                         {"hall_2", (bool)hall[1]},
+                     },
             },
         };
         this->pub_hall_msg(j);

@@ -207,7 +207,7 @@ void Laser::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr &c_m
         {
 
             this->start_measure_time[ul_id] = ros::Time::now();
-            this->distance[ul_id] = double(msg->Data[0])/100;
+            this->distance[ul_id] = double(msg->Data[0]) / 100;
             extern uint16_t laser_test_data[13];
             laser_test_data[ul_id] = msg->Data[0];
         }
@@ -223,7 +223,7 @@ void Laser::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr &c_m
             version[ul_id].clear();
             for(uint8_t i = 0; i < len; i++)
             {
-                version[ul_id].push_back(*(char *)&(msg->Data[i+1]));
+                version[ul_id].push_back(*(char *)&(msg->Data[i + 1]));
             }
             //memcpy(version[ul_id].cbegin(),&msg->Data[1], len);
             n.setParam(laser_version_param[ul_id], version[ul_id]);
