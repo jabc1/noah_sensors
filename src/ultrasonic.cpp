@@ -521,11 +521,16 @@ void Ultrasonic::rcv_from_can_node_callback(const mrobot_msgs::vci_can::ConstPtr
             }
 
             this->distance_raw[ul_id] = double(distance_tmp) / 100;
-            if((this->distance_raw[ul_id] >= this->max_range - 0.00001) || (abs(this->distance_raw[ul_id]) <= 0.00001))  //distance > DISTANCE_MAX or do not have obstacle
+
+            if(this->distance_raw[ul_id] >= this->max_range - 0.00001)  //distance > DISTANCE_MAX or do not have obstacle
             {
-                this->distance_raw[ul_id] = this->max_range;
+                //this->distance_raw[ul_id] = DISTANCE_MAX;
             }
-            if(this->distance_raw[ul_id] <= this->min_range + 0.00001)
+            else if(abs(this->distance_raw[ul_id]) <= 0.00001)  //distance > DISTANCE_MAX or do not have obstacle
+            {
+                this->distance_raw[ul_id] = DISTANCE_MAX;
+            }
+            else if(this->distance_raw[ul_id] <= this->min_range + 0.00001)
             {
                 this->distance_raw[ul_id] = this->min_range;
             }
@@ -654,7 +659,14 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     for(int i = 0; i < NAVIGATION_ULTRASONIC_NUM; i++)
     {
         this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
-        this->ultrasonic_data.range = this->distance[i];
+        if(this->distance[i] >= this->max_range)
+        {
+            this->ultrasonic_data.range = this->max_range;
+        }
+        else
+        {
+            this->ultrasonic_data.range = this->distance[i];
+        }
         this->ultrasonic_msgs.sonars[i] = ultrasonic_data;
     }
     this->ultrasonic_pub_to_navigation_all.publish(this->ultrasonic_msgs);
@@ -677,7 +689,16 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
                 close_all_flag = 0;
 
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
-                this->ultrasonic_data.range = this->distance[i];
+
+                if(this->distance[i] >= this->max_range)
+                {
+                    this->ultrasonic_data.range = this->max_range;
+                }
+                else
+                {
+                    this->ultrasonic_data.range = this->distance[i];
+                }
+
                 usleep(2000);
                 this->ultrasonic_pub_to_navigation.publish(this->ultrasonic_data);
             }
