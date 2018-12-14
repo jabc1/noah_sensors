@@ -659,7 +659,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
     for(int i = 0; i < NAVIGATION_ULTRASONIC_NUM; i++)
     {
         this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
-        if(this->distance[i] >= this->max_range)
+        if((this->distance[i] >= this->max_range) && (abs(this->distance[i] - DISTANCE_ERR_TIME_OUT) > 0.01))
         {
             this->ultrasonic_data.range = this->max_range;
         }
@@ -690,7 +690,7 @@ void Ultrasonic::pub_ultrasonic_data_to_navigation(double * ul_data)
 
                 this->ultrasonic_data.header.frame_id = this->ultrasonic_frames[i];
 
-                if(this->distance[i] >= this->max_range)
+		if((this->distance[i] >= this->max_range) && (abs(this->distance[i] - DISTANCE_ERR_TIME_OUT) > 0.01))
                 {
                     this->ultrasonic_data.range = this->max_range;
                 }
